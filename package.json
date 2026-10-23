@@ -1,0 +1,20 @@
+{
+  "name": "kind-pillbox-engine",
+  "version": "1.0.0",
+  "description": "Senior-friendly medication adherence, pharmacokinetics, and safety validation engine for ตลับยาใจดี",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/test_pharmacology_engine.js && node tests/test_prescription_scanner.js"
+  },
+  "keywords": [
+    "medication",
+    "pharmacokinetics",
+    "elderly",
+    "healthcare",
+    "safety"
+  ],
+  "author": "Kind Pillbox Team",
+  "license": "MIT"
+}
