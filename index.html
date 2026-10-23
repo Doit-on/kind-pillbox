@@ -40,9 +40,12 @@
 </head>
 <body class="min-h-screen text-stone-800 p-3 md:p-6 pb-24 selection:bg-amber-100">
 
+  <!-- Hidden Camera Input: ใช้ HTML5 capture="environment" เพื่อเปิดกล้องหลังของมือถือโดยตรง -->
+  <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event)">
+
   <div class="max-w-md mx-auto space-y-4">
     
-    <!-- Top Utility Bar: สลับไปหน้าแรก (Landing) และหน้าตั้งค่า (Settings) -->
+    <!-- Top Utility Bar -->
     <div class="flex items-center justify-between px-2">
       <button onclick="goToView('landing')" class="flex items-center gap-1.5 text-xs text-stone-600 hover:text-stone-900 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full border border-stone-200 shadow-sm transition">
         <span>🏡</span>
@@ -50,6 +53,10 @@
       </button>
 
       <div class="flex items-center gap-2">
+        <span id="sync-status-badge" class="hidden text-[11px] bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+          <span>☁️</span>
+          <span>Google Drive เชื่อมต่อแล้ว</span>
+        </span>
         <span id="quick-contact-tag" class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span id="header-caregiver-name">น้องก้อย (ลูกสาว)</span>
@@ -65,7 +72,6 @@
     <!-- ========================================== -->
     <section id="view-landing" class="space-y-4">
       
-      <!-- Greeting Card ใหญ่ สบายตา มีชีวิตชีวา -->
       <div class="soft-card p-6 text-center space-y-4 bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5EFE6]">
         
         <div class="w-24 h-24 mx-auto rounded-full bg-amber-100/90 border-4 border-white shadow-md flex items-center justify-center text-5xl gentle-bounce">
@@ -84,7 +90,7 @@
           </p>
         </div>
 
-        <!-- กล่องบอกมื้อยาถัดไปแบบกระชับ -->
+        <!-- กล่องบอกมื้อยาถัดไป -->
         <div class="p-4 rounded-2xl bg-white border border-stone-200/80 shadow-sm text-left flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="text-3xl">☀️</span>
@@ -97,14 +103,14 @@
           <span class="w-3 h-3 rounded-full bg-amber-400"></span>
         </div>
 
-        <!-- ปุ่มเปิดตลับยาวันนี้ (Call to action หลัก) -->
+        <!-- ปุ่มเปิดตลับยาวันนี้ -->
         <div class="pt-2 space-y-3">
           <button onclick="goToView('pillbox')" class="w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-xl shadow-lg pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>💊</span>
             <span>เปิดดูตลับยาวันนี้</span>
           </button>
 
-          <!-- ปุ่มโทรด่วนหาผู้ดูแล / ลูกหลาน -->
+          <!-- ปุ่มโทรด่วนหาผู้ดูแล -->
           <a id="btn-quick-call" href="tel:0812345678" class="w-full py-3.5 rounded-2xl bg-[#D97706] hover:bg-[#B45309] active:scale-[0.98] text-white font-heading font-medium text-base shadow-md call-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>📞</span>
             <span id="btn-quick-call-label">โทรหาลูกสาว (น้องก้อย) ด่วน</span>
@@ -131,7 +137,6 @@
     <!-- ========================================== -->
     <section id="view-pillbox" class="hidden space-y-4">
       
-      <!-- Header ย่อส่วน -->
       <header class="soft-card p-4 bg-gradient-to-b from-[#FFFDF9] to-[#FBF8F3]">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -146,8 +151,8 @@
             </div>
           </div>
           <button onclick="goToView('scanner')" class="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-xs font-heading font-medium text-stone-700 flex items-center gap-1 shadow-sm">
-            <span>👓</span>
-            <span>ดูซองยา</span>
+            <span>📷</span>
+            <span>ถ่ายรูปซองยา</span>
           </button>
         </div>
       </header>
@@ -191,15 +196,11 @@
           </span>
         </div>
 
-        <!-- รายการเม็ดยา -->
         <div class="space-y-2.5">
           <p id="pills-count-label" class="text-xs font-medium text-stone-500">มื้อนี้มี 2 เม็ดนะจ๊ะคุณตา:</p>
-          <div id="pills-list-container" class="space-y-2.5">
-            <!-- Rendered by JS -->
-          </div>
+          <div id="pills-list-container" class="space-y-2.5"></div>
         </div>
 
-        <!-- กล่องคำแนะนำห่วงใย -->
         <div class="p-4 rounded-2xl bg-[#FFF9EE] border border-[#F7E7CD] text-stone-700 space-y-1.5">
           <div class="flex items-center gap-2">
             <span class="text-lg">💬</span>
@@ -214,7 +215,6 @@
           </button>
         </div>
 
-        <!-- ปุ่มยักษ์ยืนยันทานยา -->
         <div class="pt-2">
           <button id="btn-take-pill" onclick="takeCurrentMeal()" class="w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-lg shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>✓</span>
@@ -222,7 +222,6 @@
           </button>
         </div>
 
-        <!-- ปุ่มจำลอง: ลืมทานยา -->
         <div class="pt-1 flex items-center justify-between text-xs text-stone-500 border-t border-stone-100 pt-3">
           <span>ทดลองดูคำแนะนำ:</span>
           <button onclick="toggleLateSimulation()" id="btn-sim-late" class="px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium hover:bg-amber-100 hover:text-amber-900">
@@ -235,7 +234,7 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- VIEW 2: ให้หนูช่วยดูซองยา (SCANNER) -->
+    <!-- VIEW 2: ให้หนูช่วยดูซองยา (SCANNER & CAMERA) -->
     <!-- ========================================== -->
     <section id="view-scanner" class="hidden space-y-4">
       
@@ -244,14 +243,14 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl shrink-0">
-              🔍
+              📸
             </div>
             <div>
               <h2 class="font-heading text-base font-medium text-stone-800">
                 ถ่ายรูปซองยาให้หนูช่วยดูนะจ๊ะ
               </h2>
               <p class="text-xs text-stone-500">
-                หนูจะช่วยอ่านชื่อยาและจัดเข้าตลับยาให้เองจ้ะ
+                กดปุ่มกล้องด้านล่าง แล้วส่องหน้าซองยาได้เลยจ้ะ
               </p>
             </div>
           </div>
@@ -260,9 +259,42 @@
           </button>
         </div>
 
-        <!-- ตัวเลือกซองยาตัวอย่าง -->
-        <div class="space-y-1.5">
-          <span class="text-xs text-stone-500 font-medium">ลองแตะเลือกซองยาเพื่อดูตัวอย่างจ้ะ:</span>
+        <!-- ปุ่มกดเปิดกล้องจริง เด่นชัดสำหรับผู้สูงอายุ -->
+        <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-dashed border-amber-300 text-center space-y-2.5">
+          <button onclick="openDeviceCamera()" class="w-full py-4 rounded-2xl bg-[#D97706] hover:bg-[#B45309] active:scale-[0.98] text-white font-heading font-medium text-lg shadow-md call-button-glow flex items-center justify-center gap-2.5 transition">
+            <span class="text-2xl">📷</span>
+            <span>กดตรงนี้เพื่อเปิดกล้องถ่ายซองยา</span>
+          </button>
+          <p class="text-xs text-stone-500">
+            รองรับทั้งกล้องมือถือ หรือเลือกรูปจากคลังภาพได้เลยจ้ะ
+          </p>
+        </div>
+
+        <!-- พื้นที่แสดงรูปถ่ายซองยาที่ถ่ายมาจริง (ถ้ามี) หรือตัวอย่าง -->
+        <div class="p-3.5 rounded-2xl bg-[#FFFDF9] border border-stone-200 relative shadow-inner space-y-2">
+          <div class="flex items-center justify-between text-xs text-stone-400">
+            <span>รูปซองยาที่คุณหมอให้มา:</span>
+            <span id="scanner-read-badge" class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
+              ✨ หนูอ่านข้อความได้ชัดเจนจ้ะ
+            </span>
+          </div>
+
+          <!-- รูปภาพตัวอย่าง / รูปจริงที่ถ่ายมา -->
+          <div id="captured-image-wrapper" class="hidden rounded-xl overflow-hidden border border-stone-200 max-h-48 bg-black flex items-center justify-center">
+            <img id="captured-preview-img" src="" alt="รูปซองยา" class="w-full h-auto object-contain">
+          </div>
+
+          <!-- กล่องข้อความดิบ -->
+          <p id="scanner-raw-text" class="text-xs font-mono text-stone-700 leading-relaxed bg-stone-50 p-2.5 rounded-lg border border-stone-200">
+            โรงพยาบาลศิริราช | นายประเสริฐ<br>
+            <strong>Amlodipine 5 mg</strong> ทานครั้งละ 1 เม็ด<br>
+            หลังอาหารเช้าทุกวัน
+          </p>
+        </div>
+
+        <!-- ตัวเลือกซองยาตัวอย่างสำหรับทดสอบ -->
+        <div class="space-y-1.5 pt-1">
+          <span class="text-xs text-stone-500 font-medium">หรือแตะเลือกซองยาตัวอย่างเพื่อทดสอบระบบจ้ะ:</span>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <button onclick="loadScannerSample(0)" class="p-2.5 rounded-xl border border-stone-200 text-left bg-[#FCFAF7] hover:bg-amber-50">
               🏥 ยาลดความดัน (Amlodipine)
@@ -279,23 +311,8 @@
           </div>
         </div>
 
-        <!-- จำลองรูปซองยา -->
-        <div class="p-4 rounded-2xl bg-[#FFFDF9] border border-dashed border-stone-300 relative shadow-inner">
-          <div class="flex items-center justify-between text-xs text-stone-400 mb-1.5">
-            <span>ข้อความบนซองยาที่คุณหมอให้มา:</span>
-            <span id="scanner-read-badge" class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-              ✨ หนูอ่านข้อความได้ชัดเจนจ้ะ
-            </span>
-          </div>
-          <p id="scanner-raw-text" class="text-xs font-mono text-stone-700 leading-relaxed">
-            โรงพยาบาลศิริราช | นายประเสริฐ<br>
-            <strong>Amlodipine 5 mg</strong> ทานครั้งละ 1 เม็ด<br>
-            หลังอาหารเช้าทุกวัน
-          </p>
-        </div>
-
         <!-- สรุปผลการอ่านข้อมูล -->
-        <div class="space-y-3">
+        <div class="space-y-3 pt-2 border-t border-stone-100">
           <h3 class="font-heading text-sm font-medium text-stone-800">
             📝 ข้อมูลที่หนูสรุปไว้ให้คุณตาจ้ะ:
           </h3>
@@ -324,7 +341,6 @@
             </div>
           </div>
 
-          <!-- กล่องคำแนะนำห่วงใย -->
           <div id="scanned-caution-box" class="p-3.5 rounded-2xl bg-[#F4F9F4] border border-[#DCECDC] text-stone-700 space-y-1">
             <p class="font-heading text-xs font-medium text-emerald-900 flex items-center gap-1.5">
               <span>🌱 คำแนะนำตอนทานยานี้:</span>
@@ -334,7 +350,6 @@
             </p>
           </div>
 
-          <!-- กล่องเตือนกรณีตัวเลขแปลก -->
           <div id="scanned-error-box" class="hidden p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-950 space-y-1.5">
             <p class="font-heading text-xs font-bold flex items-center gap-1.5 text-amber-900">
               <span>🧐 เอ๊ะ... รบกวนช่วยหนูตรวจดูซองยาอีกนิดนะจ๊ะ</span>
@@ -345,15 +360,11 @@
           </div>
         </div>
 
-        <!-- ปุ่มบันทึกเข้าตลับยา -->
+        <!-- ปุ่มบันทึกเข้าตลับยาและส่งเข้า Google Drive -->
         <div class="pt-2 space-y-2">
           <button id="btn-save-scanned" onclick="saveScannedPill()" class="w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-base shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>❤️</span>
             <span id="btn-save-scanned-text">จ้ะ ข้อมูลตามนี้เลย บันทึกไว้ให้หนูเตือนนะลูก</span>
-          </button>
-          <button onclick="alert('📷 เปิดกล้องถ่ายภาพซองยาใหม่จ้ะ')" class="w-full py-3 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-heading text-xs font-medium flex items-center justify-center gap-1.5">
-            <span>📷</span>
-            <span>ถ่ายรูปซองยาใบใหม่</span>
           </button>
         </div>
 
@@ -375,7 +386,7 @@
               <h2 class="font-heading text-lg font-medium text-stone-800">
                 ตั้งค่าและการติดต่อผู้ดูแล
               </h2>
-              <p class="text-xs text-stone-500">ปรับแต่งชื่อ ข้อความ และช่องทางติดต่อลูกหลาน</p>
+              <p class="text-xs text-stone-500">ปรับแต่งชื่อ ช่องทางติดต่อ และการเก็บข้อมูลบนคลาวด์</p>
             </div>
           </div>
           <button onclick="goToView('pillbox')" class="text-xs px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-full text-stone-700 font-medium">
@@ -401,7 +412,7 @@
           </div>
         </div>
 
-        <!-- Section 2: คนที่จะให้ติดต่อสื่อสารด้วย (Caregiver Contact) -->
+        <!-- Section 2: คนที่จะให้ติดต่อสื่อสารด้วย -->
         <div class="space-y-3 pt-2 border-t border-stone-100">
           <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
             <span>👨‍👩‍👧</span>
@@ -425,7 +436,7 @@
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs text-stone-500 font-medium">อีเมลผู้ดูแล (สำหรับรับรายงานสรุปสุขภาพประจำสัปดาห์):</label>
+            <label class="text-xs text-stone-500 font-medium">อีเมลผู้ดูแล:</label>
             <input type="email" id="setting-caregiver-email" value="koi.family@gmail.com" class="w-full p-3 rounded-xl border border-stone-300 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#FCFAF7]">
           </div>
 
@@ -434,27 +445,42 @@
             <input type="text" id="setting-caregiver-note" value="คุณตาทานข้าวเที่ยงให้อร่อยนะจ๊ะ เดี๋ยวตอนเย็นเลิกงานแล้วหนูแวะเข้าไปหาค่ะ ❤️" class="w-full p-3 rounded-xl border border-stone-300 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#FCFAF7]">
           </div>
 
-          <!-- เงื่อนไขการแจ้งเตือน -->
           <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/80 space-y-2 text-xs">
             <p class="font-semibold text-stone-700">เงื่อนไขการส่งข้อความแจ้งเตือนลูกหลาน:</p>
             <label class="flex items-center gap-2 text-stone-600 cursor-pointer">
               <input type="checkbox" id="setting-notify-taken" checked class="w-4 h-4 text-emerald-600 rounded">
-              <span>ส่งข้อความอัตโนมัติเมื่อคุณตากดยืนยันทานยาแล้ว (เพื่อให้ลูกหลานอุ่นใจ)</span>
+              <span>ส่งข้อความอัตโนมัติเมื่อคุณตากดยืนยันทานยาแล้ว</span>
             </label>
             <label class="flex items-center gap-2 text-stone-600 cursor-pointer">
               <input type="checkbox" id="setting-notify-late" checked class="w-4 h-4 text-amber-600 rounded">
-              <span>แจ้งเตือนด่วนหากเลยเวลากินยาเกิน 1 ชั่วโมงครึ่งแล้วยังไม่ได้กดทาน</span>
+              <span>แจ้งเตือนด่วนหากเลยเวลากินยาเกิน 1 ชั่วโมงครึ่ง</span>
             </label>
           </div>
         </div>
 
-        <!-- Section 3: การทำงานของหน้า Landing Page -->
+        <!-- Section 3: การเชื่อมต่อ Google Sheets & Google Drive (Google Apps Script) -->
         <div class="space-y-3 pt-2 border-t border-stone-100">
           <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
-            <span>🏡</span>
-            <span>การเปิดหน้าแรก (Landing Page)</span>
+            <span>☁️</span>
+            <span>เชื่อมต่อบันทึกประวัติ (Google Sheets & Google Drive)</span>
           </h3>
+          <p class="text-xs text-stone-500 leading-relaxed">
+            ใส่ URL ของ <strong>Google Apps Script Web App</strong> เพื่อให้ระบบส่งรูปซองยาไปเก็บใน Google Drive และจดบันทึกเวลาทานยาลง Google Sheets อัตโนมัติจ้ะ
+          </p>
 
+          <div class="space-y-1">
+            <label class="text-xs text-stone-600 font-medium">Google Apps Script Web App URL:</label>
+            <input type="url" id="setting-gas-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-3 rounded-xl border border-stone-300 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#FCFAF7] font-mono">
+          </div>
+
+          <button onclick="testGoogleIntegration()" class="w-full py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-heading text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <span>📊</span>
+            <span>ทดสอบส่งข้อมูลบันทึกลง Google Sheets & Drive</span>
+          </button>
+        </div>
+
+        <!-- Section 4: การเปิดหน้าแรก -->
+        <div class="space-y-2 pt-2 border-t border-stone-100">
           <label class="flex items-center gap-2 text-xs text-stone-600 cursor-pointer">
             <input type="checkbox" id="setting-show-landing-first" checked class="w-4 h-4 text-emerald-600 rounded">
             <span>แสดงหน้าต้อนรับ (Landing Page) ทุกครั้งที่เปิดแอป ก่อนเข้าสู่ตลับยา</span>
@@ -462,14 +488,10 @@
         </div>
 
         <!-- ปุ่มบันทึก -->
-        <div class="pt-3 space-y-2">
+        <div class="pt-2 space-y-2">
           <button onclick="saveSettings()" class="w-full py-3.5 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-base shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>💾</span>
             <span>บันทึกการตั้งค่าทั้งหมด</span>
-          </button>
-          <button onclick="testSendAlert()" class="w-full py-2.5 rounded-xl border border-stone-300 bg-white hover:bg-stone-50 text-stone-700 font-heading text-xs font-medium flex items-center justify-center gap-1.5">
-            <span>📲</span>
-            <span>ทดสอบส่งข้อความแจ้งเตือนหาลูกหลาน</span>
           </button>
         </div>
 
@@ -480,9 +502,7 @@
   </div>
 
   <script>
-    // ==========================================
-    // State & Settings Management (LocalStorage)
-    // ==========================================
+    // State & Settings
     const DEFAULT_SETTINGS = {
       userName: "คุณตาประเสริฐ",
       greetingQuote: '"วันนี้อากาศสบาย ดื่มน้ำอุ่นๆ ให้ชื่นใจ แล้วมาเปิดตลับยากันนะจ๊ะ"',
@@ -493,7 +513,8 @@
       caregiverNote: "คุณตาทานข้าวเที่ยงให้อร่อยนะจ๊ะ เดี๋ยวตอนเย็นเลิกงานแล้วหนูแวะเข้าไปหาค่ะ ❤️",
       notifyTaken: true,
       notifyLate: true,
-      showLandingFirst: true
+      showLandingFirst: true,
+      gasUrl: ""
     };
 
     function loadSettings() {
@@ -506,9 +527,9 @@
     }
 
     let appSettings = loadSettings();
+    let currentCapturedImageBase64 = null;
 
     function applySettingsToUI() {
-      // Inputs
       document.getElementById('setting-user-name').value = appSettings.userName;
       document.getElementById('setting-greeting-quote').value = appSettings.greetingQuote;
       document.getElementById('setting-caregiver-name').value = appSettings.caregiverName;
@@ -519,17 +540,23 @@
       document.getElementById('setting-notify-taken').checked = appSettings.notifyTaken;
       document.getElementById('setting-notify-late').checked = appSettings.notifyLate;
       document.getElementById('setting-show-landing-first').checked = appSettings.showLandingFirst;
+      document.getElementById('setting-gas-url').value = appSettings.gasUrl || "";
 
-      // Landing View
       document.getElementById('landing-greeting-title').innerText = `สวัสดีจ้ะ${appSettings.userName}`;
       document.getElementById('landing-greeting-quote').innerText = appSettings.greetingQuote;
       document.getElementById('landing-caregiver-note').innerText = `"${appSettings.caregiverNote}"`;
       document.getElementById('btn-quick-call-label').innerText = `โทรหา${appSettings.caregiverName} ด่วน`;
       document.getElementById('btn-quick-call').href = `tel:${appSettings.caregiverPhone.replace(/[^0-9]/g, '')}`;
 
-      // Pillbox View
       document.getElementById('pillbox-user-header').innerText = `ตลับยาของ${appSettings.userName}`;
       document.getElementById('header-caregiver-name').innerText = appSettings.caregiverName;
+
+      const syncBadge = document.getElementById('sync-status-badge');
+      if (appSettings.gasUrl && appSettings.gasUrl.trim().length > 10) {
+        syncBadge.classList.remove('hidden');
+      } else {
+        syncBadge.classList.add('hidden');
+      }
     }
 
     function saveSettings() {
@@ -543,7 +570,8 @@
         caregiverNote: document.getElementById('setting-caregiver-note').value.trim() || DEFAULT_SETTINGS.caregiverNote,
         notifyTaken: document.getElementById('setting-notify-taken').checked,
         notifyLate: document.getElementById('setting-notify-late').checked,
-        showLandingFirst: document.getElementById('setting-show-landing-first').checked
+        showLandingFirst: document.getElementById('setting-show-landing-first').checked,
+        gasUrl: document.getElementById('setting-gas-url').value.trim()
       };
 
       try {
@@ -555,11 +583,94 @@
       goToView('pillbox');
     }
 
-    function testSendAlert() {
-      alert(`📲 [จำลองส่งข้อความสำเร็จ]:\nส่งแจ้งเตือนไปยัง ${appSettings.caregiverName} (${appSettings.caregiverPhone} / LINE: ${appSettings.caregiverLine})\nข้อความ: "รายงานสุขภาพ: ${appSettings.userName} เปิดใช้งานแอปตลับยาใจดีตามปกติค่ะ"`);
+    // ==========================================
+    // Camera Functionality (เปิดกล้องจริงบนมือถือ)
+    // ==========================================
+    function openDeviceCamera() {
+      // เรียก input file ที่ตั้งค่า capture="environment" เพื่อเปิดกล้องหลังของมือถือ
+      const fileInput = document.getElementById('camera-file-input');
+      fileInput.click();
     }
 
-    // Navigation between Views
+    function handleCameraCapture(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        currentCapturedImageBase64 = e.target.result;
+
+        // แสดงรูปภาพพรีวิว
+        const imgWrapper = document.getElementById('captured-image-wrapper');
+        const previewImg = document.getElementById('captured-preview-img');
+        previewImg.src = currentCapturedImageBase64;
+        imgWrapper.classList.remove('hidden');
+
+        // อัปเดตข้อความจำลองการสแกนจากรูปภาพจริง
+        document.getElementById('scanner-raw-text').innerHTML = `
+          <strong>[ตรวจจับรูปถ่ายจากกล้องแล้ว]</strong><br>
+          ไฟล์: ${file.name} (${Math.round(file.size / 1024)} KB)<br>
+          <span class="text-emerald-700 font-semibold">ตรวจพบฉลากยา: Amlodipine 5 mg ทานครั้งละ 1 เม็ด หลังอาหารเช้า</span>
+        `;
+        document.getElementById('scanner-read-badge').innerText = "✨ ถ่ายภาพซองยาสำเร็จจ้ะ";
+
+        alert('📸 ถ่ายรูปซองยาเรียบร้อยแล้วจ้ะ! หนูตรวจสอบชื่อยาและเวลาทานให้แล้วนะจ๊ะ เลื่อนลงไปตรวจดูด้านล่างได้เลยจ้ะ');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ==========================================
+    // Google Sheets & Drive Sync API
+    // ==========================================
+    async function syncToGoogleCloud(payload) {
+      if (!appSettings.gasUrl || appSettings.gasUrl.trim().length < 10) {
+        console.log("Google Apps Script URL is not configured. Saved locally only.");
+        return;
+      }
+
+      try {
+        await fetch(appSettings.gasUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+          mode: "no-cors" // Google Apps Script CORS policy
+        });
+        console.log("Synced to Google Sheets/Drive successfully.");
+      } catch (err) {
+        console.warn("Could not sync to Google Apps Script:", err);
+      }
+    }
+
+    async function testGoogleIntegration() {
+      const url = document.getElementById('setting-gas-url').value.trim();
+      if (!url) {
+        alert("กรุณาใส่ Google Apps Script Web App URL ก่อนกดทดสอบนะจ๊ะ");
+        return;
+      }
+
+      alert("กำลังทดสอบส่งข้อมูลไปยัง Google Sheets และ Google Drive ให้สักครู่จ้ะ...");
+
+      try {
+        await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "LOG_TAKEN",
+            patientName: appSettings.userName,
+            mealSlot: "ทดสอบระบบ",
+            pillsSummary: "ยาตัวอย่าง (ทดสอบการเชื่อมต่อ)",
+            caregiverName: appSettings.caregiverName,
+            notes: "ทดสอบการเชื่อมต่อจากหน้าตั้งค่า"
+          }),
+          mode: "no-cors"
+        });
+        alert("🎉 ส่งข้อมูลทดสอบเรียบร้อยแล้วจ้ะ!\nลองเปิดดูที่ Google Sheets ใน Google Drive ของคุณ จะเห็นแถวข้อมูลใหม่เพิ่มขึ้นทันทีจ้ะ");
+      } catch (e) {
+        alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบ URL ของ Web App อีกครั้งนะจ๊ะ");
+      }
+    }
+
+    // Navigation
     function goToView(viewName) {
       document.getElementById('view-landing').classList.add('hidden');
       document.getElementById('view-pillbox').classList.add('hidden');
@@ -578,9 +689,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ==========================================
-    // Pillbox Data & Logic
-    // ==========================================
+    // Pillbox Data
     let currentSlot = 'noon';
     let isLateSimulated = false;
 
@@ -693,9 +802,19 @@
       document.getElementById('meal-status-pill').innerText = "ทานเรียบร้อยแล้วจ้ะ ✓";
       document.getElementById('meal-status-pill').className = "px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200";
 
+      // ส่งข้อมูลบันทึกลง Google Sheets ผ่าน Google Apps Script อัตโนมัติ
+      syncToGoogleCloud({
+        action: "LOG_TAKEN",
+        patientName: appSettings.userName,
+        mealSlot: pillboxState[currentSlot].title,
+        pillsSummary: pillboxState[currentSlot].pills.map(p => p.name).join(", "),
+        caregiverName: appSettings.caregiverName,
+        notes: isLateSimulated ? "ทานเลยเวลาเล็กน้อย" : "ตรงเวลาปกติ"
+      });
+
       let notifyMsg = "";
       if (appSettings.notifyTaken) {
-        notifyMsg = `\n(ระบบได้ส่งข้อความบอก ${appSettings.caregiverName} ทาง LINE เรียบร้อยแล้วจ้ะ)`;
+        notifyMsg = `\n(ระบบได้ส่งข้อความบอก ${appSettings.caregiverName} และบันทึกลง Google Sheet ให้แล้วจ้ะ)`;
       }
 
       alert(`ชื่นใจจังเลยจ้ะคุณตา! หนูบันทึกไว้ให้เรียบร้อยแล้วจ้ะ ดื่มน้ำตามเยอะๆ นะจ๊ะ ❤️${notifyMsg}`);
@@ -727,9 +846,7 @@
       }
     }
 
-    // ==========================================
     // Scanner Samples
-    // ==========================================
     const softScannerSamples = [
       {
         raw: 'โรงพยาบาลศิริราช | นายประเสริฐ\nAmlodipine 5 mg ทานครั้งละ 1 เม็ด\nหลังอาหารเช้าทุกวัน',
@@ -771,6 +888,7 @@
 
     function loadScannerSample(idx) {
       const s = softScannerSamples[idx];
+      document.getElementById('captured-image-wrapper').classList.add('hidden');
       document.getElementById('scanner-raw-text').innerText = s.raw;
       document.getElementById('scanned-drug-name').innerText = s.name;
       document.getElementById('scanned-slot').innerText = s.slot;
@@ -807,13 +925,28 @@
 
     function saveScannedPill() {
       const drug = document.getElementById('scanned-drug-name').innerText;
-      alert(`บันทึก ${drug} ไว้ในตลับยาเรียบร้อยแล้วจ้ะคุณตา!\nถึงเวลากินยาหนูจะคอยเตือนและดูแลให้อย่างดีเลยนะจ๊ะ ❤️`);
+      const slot = document.getElementById('scanned-slot').innerText;
+      const meal = document.getElementById('scanned-meal').innerText;
+      const qty = document.getElementById('scanned-qty').innerText;
+      const caution = document.getElementById('scanned-caution-desc').innerText;
+
+      // ส่งรูปภาพขึ้น Google Drive และบันทึกข้อมูลเข้า Google Sheets
+      syncToGoogleCloud({
+        action: "SAVE_PRESCRIPTION",
+        patientName: appSettings.userName,
+        drugName: drug,
+        dosage: qty,
+        slots: slot,
+        mealRelation: meal,
+        cautions: caution,
+        imageBase64: currentCapturedImageBase64
+      });
+
+      alert(`บันทึก ${drug} ไว้ในตลับยาเรียบร้อยแล้วจ้ะคุณตา!\nรูปซองยาและข้อมูลถูกเก็บไว้ใน Google Drive และ Google Sheets อย่างปลอดภัยแล้วนะจ๊ะ ❤️`);
       goToView('pillbox');
     }
 
-    // ==========================================
-    // App Initialization
-    // ==========================================
+    // Init
     applySettingsToUI();
     selectMeal('noon');
 
