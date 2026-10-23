@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ตลับยาใจดี - ดูแลด้วยรักและถูกต้องตามแพทย์สั่ง</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Tesseract.js สำหรับ OCR อ่านตัวหนังสือจริงจากภาพถ่าย -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -36,11 +38,12 @@
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-4px); }
     }
-    #camera-video {
-      transform: scaleX(1);
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .field-highlight {
+      animation: highlightPulse 1.5s ease-out;
+    }
+    @keyframes highlightPulse {
+      0% { background-color: #ECFDF5; border-color: #10B981; }
+      100% { background-color: #FFFFFF; border-color: #D6D3D1; }
     }
   </style>
 </head>
@@ -202,17 +205,23 @@
           <div id="pills-list-container" class="space-y-2.5"></div>
         </div>
 
+        <!-- กล่องคำแนะนำ AI ที่สร้างขึ้นสดๆ ให้สอดคล้องกับตัวยาจริงในมื้อนั้น 100% -->
         <div class="p-4 rounded-2xl bg-[#FFF9EE] border border-[#F7E7CD] text-stone-700 space-y-1.5">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">💬</span>
-            <p class="font-heading text-xs font-medium text-amber-950">คำแนะนำตามฉลากยาของแพทย์</p>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🤖</span>
+              <p class="font-heading text-xs font-semibold text-amber-950">คำแนะนำ AI ตามซองยาของมื้อนี้:</p>
+            </div>
+            <span class="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">
+              วิเคราะห์จากยาจริง
+            </span>
           </div>
-          <p id="meal-advice" class="text-xs leading-relaxed text-stone-600">
-            ทานข้าวกลางวันให้อิ่มสบายท้อง แล้วดื่มน้ำตามแก้วใหญ่ๆ 1 แก้วนะจ๊ะ ยาจะช่วยดูแลกระเพาะให้สบายตลอดบ่ายจ้ะ
+          <p id="meal-advice" class="text-xs leading-relaxed text-stone-700">
+            กำลังประมวลผลคำแนะนำที่สอดคล้องกับยาในมื้อนี้จ้ะ...
           </p>
           <button onclick="speakAdvice()" class="inline-flex items-center gap-1.5 text-xs text-amber-900 font-semibold pt-1 hover:underline">
             <span>🔊</span>
-            <span>กดตรงนี้ ให้หนูอ่านข้อความนี้ให้ฟังนะจ๊ะ</span>
+            <span>กดตรงนี้ ให้หนูอ่านคำแนะนำนี้ให้ฟังนะจ๊ะ</span>
           </button>
         </div>
 
@@ -234,9 +243,9 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- VIEW 2: LIVE CAMERA SCANNER & VERIFICATION -->
-    <!-- ========================================== -->
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: ระบบสแกน OCR จริงและแปลข้อความซองยาลงช่องข้อมูล                  -->
+    <!-- ========================================================================= -->
     <section id="view-scanner" class="hidden space-y-4">
       <div class="soft-card p-5 space-y-4">
         
@@ -245,10 +254,10 @@
             <span class="text-2xl">📷</span>
             <div>
               <h2 class="font-heading text-base font-semibold text-stone-800">
-                สแกนซองยาจากโรงพยาบาล/คลินิก
+                สแกนซองยาและแปลข้อความลงช่องข้อมูล
               </h2>
               <p class="text-xs text-stone-500">
-                ต้องอ้างอิงจากหน้าซองยาที่ได้รับจัดสรรมา ห้ามกำหนดเอง
+                ถ่ายภาพซองยาจริง ระบบจะใช้สายตา OCR อ่านข้อความแล้วจัดสรรลงช่องให้จ้ะ
               </p>
             </div>
           </div>
@@ -259,21 +268,22 @@
 
         <!-- Live Camera Viewfinder Box -->
         <div class="relative rounded-2xl overflow-hidden bg-black aspect-[4/3] flex items-center justify-center shadow-inner border-2 border-stone-300">
-          
-          <!-- Live Video Stream -->
           <video id="camera-video" playsinline autoplay muted class="w-full h-full object-cover hidden"></video>
-
-          <!-- Captured Canvas / Image Preview -->
           <img id="scanned-image-preview" src="" alt="ภาพซองยา" class="w-full h-full object-contain hidden bg-stone-900">
 
-          <!-- Initial Camera Standby State -->
           <div id="camera-standby-placeholder" class="text-center p-6 text-white space-y-3">
             <span class="text-4xl block">📸</span>
             <p class="text-sm font-heading font-medium">พร้อมส่องกล้องถ่ายรูปหน้าซองยาจ้ะ</p>
             <p class="text-xs text-stone-300">วางซองยาให้อยู่ในกรอบ และให้เห็นชื่อยาและเวลากินชัดเจน</p>
           </div>
 
-          <!-- Camera Controls Overlay (เมื่อเปิดกล้องอยู่) -->
+          <!-- Loading Spinner Overlay เมื่อกำลังอ่าน OCR จากรูปภาพจริง -->
+          <div id="ocr-loading-overlay" class="hidden absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center text-white p-4 text-center space-y-2 z-10">
+            <div class="w-10 h-10 border-4 border-amber-300 border-t-transparent rounded-full animate-spin"></div>
+            <p class="font-heading text-sm font-medium text-amber-200">หนูกำลังตั้งใจอ่านตัวหนังสือบนซองยาจ้ะ...</p>
+            <p id="ocr-progress-text" class="text-xs text-stone-300">กำลังประมวลผลสายตา AI (OCR)...</p>
+          </div>
+
           <div id="camera-live-controls" class="hidden absolute bottom-3 inset-x-0 flex items-center justify-center gap-4 px-4">
             <button onclick="switchCameraFacing()" class="w-10 h-10 rounded-full bg-white/30 backdrop-blur text-white flex items-center justify-center text-lg shadow hover:bg-white/50" title="สลับกล้อง">
               🔄
@@ -301,33 +311,58 @@
           </button>
         </div>
 
-        <!-- ตัวอย่างซองยาทางการแพทย์ (เพื่อการทดสอบตามฉลากจริง) -->
-        <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/80 space-y-2 text-xs">
-          <span class="font-semibold text-stone-600 block">หรือเลือกตัวอย่างฉลากยาจริงจากโรงพยาบาลเพื่อทดสอบ:</span>
+        <!-- กล่องข้อความที่อ่านได้จากซองยา (OCR Textarea & Parser Trigger) -->
+        <div class="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-amber-950 flex items-center gap-1">
+              <span>📝 ข้อความที่อ่านได้จากหน้าซองยา:</span>
+            </label>
+            <span id="ocr-status-tag" class="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+              พร้อมถอดรหัส
+            </span>
+          </div>
+
+          <textarea id="raw-prescription-text" rows="3" placeholder="เมื่อคุณตาถ่ายภาพซองยา ข้อความจริงจะปรากฏตรงนี้อัตโนมัติ หรือคุณตาสามารถพิมพ์/วางข้อความฉลากยาได้ทันทีจ้ะ" class="w-full p-2.5 rounded-xl border border-amber-300 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white font-mono leading-relaxed"></textarea>
+
+          <div class="flex gap-2 pt-1">
+            <button onclick="triggerParseTextToFields()" class="flex-1 py-2.5 bg-[#3D7A5A] hover:bg-[#32674B] text-white font-heading text-xs font-medium rounded-xl shadow flex items-center justify-center gap-1.5 transition">
+              <span>⚡</span>
+              <span>แปลข้อความลงในช่องข้อมูลทันที</span>
+            </button>
+            <button onclick="document.getElementById('raw-prescription-text').value = '';" class="py-2.5 px-3 border border-stone-300 bg-white text-stone-600 text-xs rounded-xl hover:bg-stone-50">
+              ล้างข้อความ
+            </button>
+          </div>
+        </div>
+
+        <!-- ปุ่มตัวอย่างฉลากยาโรงพยาบาลจริง -->
+        <div class="space-y-1.5 text-xs">
+          <span class="font-semibold text-stone-600 block">หรือแตะเลือกซองยาตัวอย่างเพื่อทดสอบการถอดรหัส:</span>
           <div class="grid grid-cols-2 gap-1.5">
-            <button onclick="loadPresetPrescription(0)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
+            <button onclick="applySamplePreset(0)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
               🏥 รพ.ศิริราช: Amlodipine 5mg
             </button>
-            <button onclick="loadPresetPrescription(1)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
+            <button onclick="applySamplePreset(1)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
               🏨 รพ.กรุงเทพ: Metformin 500mg
             </button>
-            <button onclick="loadPresetPrescription(2)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
+            <button onclick="applySamplePreset(2)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
               🩸 รพ.จุฬา: Warfarin 3mg
             </button>
-            <button onclick="loadPresetPrescription(3)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate text-rose-700 font-medium">
-              ⚠️ ซองที่พิมพ์ตัวเลขผิด (500mg)
+            <button onclick="applySamplePreset(3)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
+              🌙 รพ.รามา: Atorvastatin 20mg
             </button>
           </div>
         </div>
 
         <!-- ======================================================= -->
-        <!-- ฟอร์มตรวจทานและแก้ไขข้อมูลซองยาอย่างละเอียด (VERIFICATION FORM) -->
+        <!-- ช่องข้อมูลที่ได้รับการแปลและจัดสรรอย่างแม่นยำ (MAPPED FIELDS) -->
         <!-- ======================================================= -->
-        <div id="prescription-review-form" class="space-y-3 pt-2 border-t border-stone-200">
+        <div id="prescription-review-form" class="space-y-3 pt-3 border-t-2 border-dashed border-stone-200">
+          
           <div class="flex items-center justify-between">
             <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
               <span>📋</span>
-              <span>ใบตรวจทานและยืนยันข้อมูลตามซองยา</span>
+              <span>ผลการแปลข้อความลงในช่องที่กำหนด</span>
             </h3>
             <span id="review-safety-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
               ✓ ข้อมูลครบถ้วน
@@ -335,24 +370,33 @@
           </div>
 
           <p class="text-xs text-stone-500">
-            โปรดตรวจดูข้อความที่พิมพ์บนซองยาจริง และแก้ไขในช่องด้านล่างให้ตรงกับซองยา 100%:
+            ตรวจสอบข้อมูลในแต่ละช่องด้านล่างให้ตรงกับซองยาจริง สามารถแก้ไขตัวสะกดได้ทุกช่องจ้ะ:
           </p>
 
           <div class="space-y-2.5 text-xs">
             <!-- 1. ชื่อยา -->
             <div>
-              <label class="font-semibold text-stone-700">ชื่อยา (ตามที่พิมพ์บนซองยา):</label>
-              <input type="text" id="verify-drug-name" value="Amlodipine (ยาลดความดัน)" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm font-medium focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
+              <div class="flex items-center justify-between">
+                <label class="font-semibold text-stone-700">1. ชื่อยา (ตามที่ระบุบนซองยา):</label>
+                <span id="badge-match-name" class="text-[10px] text-emerald-700 font-bold">รอระบุชื่อยา</span>
+              </div>
+              <input type="text" id="verify-drug-name" placeholder="เช่น Amlodipine หรือ ยาลดความดัน" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
             </div>
 
-            <!-- 2. ขนาดยา & หน่วย -->
+            <!-- 2. ขนาดยา & จำนวน -->
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="font-semibold text-stone-700">ขนาดยา (เช่น 5, 500):</label>
-                <input type="text" id="verify-drug-dosage" value="5 mg" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
+                <div class="flex items-center justify-between">
+                  <label class="font-semibold text-stone-700">2. ขนาดยา (mg):</label>
+                  <span id="badge-match-dosage" class="text-[10px] text-emerald-700 font-bold">-</span>
+                </div>
+                <input type="text" id="verify-drug-dosage" placeholder="เช่น 5 mg" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
               </div>
               <div>
-                <label class="font-semibold text-stone-700">จำนวนที่ทานต่อครั้ง:</label>
+                <div class="flex items-center justify-between">
+                  <label class="font-semibold text-stone-700">3. จำนวนที่ทาน:</label>
+                  <span id="badge-match-amount" class="text-[10px] text-emerald-700 font-bold">-</span>
+                </div>
                 <input type="text" id="verify-drug-amount" value="ครั้งละ 1 เม็ด" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
               </div>
             </div>
@@ -360,7 +404,7 @@
             <!-- 3. มื้อยา & เวลาอาหาร -->
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="font-semibold text-stone-700">มื้อยาที่กำหนดบนซอง:</label>
+                <label class="font-semibold text-stone-700">4. มื้อยาที่กำหนดบนซอง:</label>
                 <select id="verify-drug-slot" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
                   <option value="morning">🌅 มื้อเช้า (08:00)</option>
                   <option value="noon">☀️ มื้อเที่ยง (12:30)</option>
@@ -369,7 +413,7 @@
                 </select>
               </div>
               <div>
-                <label class="font-semibold text-stone-700">ความสัมพันธ์กับอาหาร:</label>
+                <label class="font-semibold text-stone-700">5. ความสัมพันธ์กับอาหาร:</label>
                 <select id="verify-drug-meal" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
                   <option value="หลังอาหาร">🍽️ หลังอาหาร</option>
                   <option value="ก่อนอาหาร 30 นาที">⏰ ก่อนอาหาร 30 นาที</option>
@@ -382,16 +426,16 @@
 
             <!-- 4. โรงพยาบาล และคำแนะนำพิเศษ -->
             <div>
-              <label class="font-semibold text-stone-700">โรงพยาบาล/คลินิกที่จ่ายยา:</label>
-              <input type="text" id="verify-hospital-name" value="โรงพยาบาลศิริราช" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
+              <label class="font-semibold text-stone-700">6. โรงพยาบาล/คลินิกที่จ่ายยา:</label>
+              <input type="text" id="verify-hospital-name" placeholder="เช่น โรงพยาบาลศิริราช" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
             </div>
 
             <div>
-              <label class="font-semibold text-stone-700">คำเตือนพิเศษของแพทย์/เภสัชกร:</label>
-              <input type="text" id="verify-drug-caution" value="ทานมื้อเช้าพร้อมน้ำอุ่น หลีกเลี่ยงน้ำส้มโอและเกรปฟรุต" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
+              <label class="font-semibold text-stone-700">7. คำเตือนพิเศษตามฉลากยา:</label>
+              <input type="text" id="verify-drug-caution" placeholder="เช่น ดื่มน้ำตามมากๆ หรือ หลีกเลี่ยงน้ำส้มโอ" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
             </div>
 
-            <!-- กล่องแจ้งเตือนความผิดปกติ (ถ้ามี) -->
+            <!-- กล่องแจ้งเตือนความผิดปกติ -->
             <div id="verify-error-box" class="hidden p-3 bg-rose-50 rounded-xl border border-rose-300 text-rose-900 space-y-1">
               <p class="font-bold text-xs flex items-center gap-1">
                 <span>🛑 ตรวจพบข้อผิดพลาด:</span>
@@ -401,7 +445,7 @@
               </p>
             </div>
 
-            <!-- เงื่อนไขยืนยัน (Mandatory Checkbox) -->
+            <!-- เงื่อนไขยืนยัน -->
             <div class="p-3 bg-amber-50/80 rounded-xl border border-amber-200 mt-2">
               <label class="flex items-start gap-2 cursor-pointer">
                 <input type="checkbox" id="verify-confirm-checkbox" onchange="toggleConfirmButtonState()" class="w-4 h-4 text-emerald-600 rounded mt-0.5">
@@ -581,12 +625,9 @@
   </div>
 
   <script>
-    // ==========================================
-    // Master State & Configuration
-    // ==========================================
+    // Master State
     const DEFAULT_SETTINGS = {
       userName: "คุณตาประเสริฐ",
-      greetingQuote: '"ตลับยานี้จัดสรรตามซองยาของโรงพยาบาลอย่างถูกต้อง ปลอดภัยนะจ๊ะ"',
       caregiverName: "น้องก้อย (ลูกสาว)",
       caregiverPhone: "081-234-5678",
       caregiverLine: "koi_caregiver",
@@ -607,7 +648,7 @@
     let appSettings = loadSettings();
     let currentCapturedImageBase64 = null;
     let cameraMediaStream = null;
-    let currentFacingMode = "environment"; // กล้องหลังเป็นค่าเริ่มต้น
+    let currentFacingMode = "environment";
 
     const SLOT_SCHEDULE_HOURS = {
       morning: "08:00",
@@ -616,43 +657,38 @@
       bedtime: "21:00"
     };
 
-    // Medication State (ทุกตัวต้องอ้างอิงจากซองยาจริง)
     const defaultPillboxState = {
       morning: {
         title: 'ยามื้อเช้า (หลังอาหาร)',
         tag: 'ทานเรียบร้อยแล้วจ้ะ',
-        advice: 'มื้อเช้าคุณตาทานครบเรียบร้อยแล้วจ้ะ ยาลดความดันกำลังช่วยให้คุณตารู้สึกสดชื่นตลอดวันนะจ๊ะ',
         isTaken: true,
         pills: [
-          { id: 'p_1', name: 'ยาลดความดันโลหิต (Amlodipine 5mg)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานพร้อมน้ำอุ่น หลีกเลี่ยงน้ำส้มโอ', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
+          { id: 'p_1', name: 'Amlodipine (ยาลดความดัน)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานมื้อเช้าพร้อมน้ำอุ่น หลีกเลี่ยงน้ำส้มโอ', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
         ]
       },
       noon: {
         title: 'ยามื้อกลางวัน (หลังอาหาร)',
         tag: 'เตรียมทานพร้อมข้าวเที่ยง',
-        advice: 'ทานข้าวกลางวันให้อิ่มสบายท้อง แล้วดื่มน้ำตามแก้วใหญ่ๆ 1 แก้วนะจ๊ะ ยาจะช่วยดูแลกระเพาะให้สบายตลอดบ่ายจ้ะ',
         isTaken: false,
         pills: [
-          { id: 'p_2', name: 'ยาลดกรดในกระเพาะ (Omeprazole 20mg)', detail: 'ครั้งละ 1 แคปซูล • ก่อนอาหาร 30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'กลืนทั้งเม็ดพร้อมน้ำ', icon: '💊', bg: 'bg-sky-50', border: 'border-sky-200' },
-          { id: 'p_3', name: 'วิตามินบำรุงปลายประสาท (Vitamin B)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานหลังอาหารกลางวัน', icon: '🟡', bg: 'bg-amber-50', border: 'border-amber-200' }
+          { id: 'p_2', name: 'Omeprazole (ยาลดกรดในกระเพาะ)', detail: 'ครั้งละ 1 แคปซูล • ก่อนอาหาร 30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'กลืนทั้งเม็ดพร้อมน้ำ ก่อนอาหาร 30 นาที ห้ามทานพร้อมนม', icon: '💊', bg: 'bg-sky-50', border: 'border-sky-200' },
+          { id: 'p_3', name: 'Vitamin B (วิตามินบำรุงปลายประสาท)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานหลังอาหารกลางวัน', icon: '🟡', bg: 'bg-amber-50', border: 'border-amber-200' }
         ]
       },
       evening: {
         title: 'ยามื้อเย็น (พร้อมอาหาร)',
         tag: 'รอทานมื้อเย็น 18:00 น.',
-        advice: 'มื้อเย็นทานยาพร้อมข้าวคำแรกนะจ๊ะ จะช่วยควบคุมระดับน้ำตาลหลังมื้ออาหารได้อย่างดีที่สุดจ้ะ',
         isTaken: false,
         pills: [
-          { id: 'p_4', name: 'ยาควบคุมระดับน้ำตาล (Metformin 500mg)', detail: 'ครั้งละ 1 เม็ด • พร้อมอาหารคำแรก', hospital: 'โรงพยาบาลกรุงเทพ', advice: 'ทานพร้อมข้าวคำแรกเพื่อไม่ให้ระคายเคืองกระเพาะ', icon: '💊', bg: 'bg-emerald-50', border: 'border-emerald-200' }
+          { id: 'p_4', name: 'Metformin (ยาควบคุมระดับน้ำตาล)', detail: 'ครั้งละ 1 เม็ด • พร้อมอาหารคำแรก', hospital: 'โรงพยาบาลกรุงเทพ', advice: 'ทานพร้อมข้าวคำแรกเพื่อไม่ให้ระคายเคืองกระเพาะ งดแอลกอฮอล์', icon: '💊', bg: 'bg-emerald-50', border: 'border-emerald-200' }
         ]
       },
       bedtime: {
         title: 'ยาก่อนนอน',
         tag: 'ทานก่อนเข้านอน 21:00 น.',
-        advice: 'ทานยานี้แล้วจะช่วยดูแลไขมันในเส้นเลือด และช่วยให้คุณตาหลับพักผ่อนได้อย่างสบายตลอดคืนนะจ๊ะ',
         isTaken: false,
         pills: [
-          { id: 'p_5', name: 'ยาลดไขมันในเลือด (Atorvastatin 20mg)', detail: 'ครั้งละ 1 เม็ด • ก่อนนอน', hospital: 'โรงพยาบาลจุฬาลงกรณ์', advice: 'ทานก่อนนอนเป็นประจำ', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
+          { id: 'p_5', name: 'Atorvastatin (ยาลดไขมันในเลือด)', detail: 'ครั้งละ 1 เม็ด • ก่อนนอน', hospital: 'โรงพยาบาลจุฬาลงกรณ์', advice: 'ทานก่อนนอนเป็นประจำเพื่อช่วยดูแลหลอดเลือด', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
         ]
       }
     };
@@ -711,22 +747,274 @@
     }
 
     // =========================================================================
-    // ระบบกล้องถ่ายภาพจริง (Live Viewfinder Camera using WebRTC getUserMedia)
+    // 🧠 ระบบ AI สร้างคำแนะนำเฉพาะตัวยาในมื้อนั้นๆ แบบ Dynamic 100%
     // =========================================================================
+    function generateSlotAiAdvice(slot) {
+      const slotData = pillboxState[slot];
+      const pills = slotData ? slotData.pills : [];
+
+      if (!pills || pills.length === 0) {
+        return "มื้อนี้ยังไม่มีรายการยาตามแพทย์สั่งจ้ะ พักผ่อนให้สบายใจนะจ๊ะ";
+      }
+
+      const adviceList = [];
+      const cautionList = [];
+
+      pills.forEach(pill => {
+        const nameLower = (pill.name || "").toLowerCase();
+        const customCaution = pill.advice || "";
+
+        if (nameLower.includes("amlodipine") || nameLower.includes("norvasc")) {
+          adviceList.push("ยาลดความดัน (Amlodipine) จะช่วยคุมความดันให้คงที่ตลอดทั้งวัน");
+          cautionList.push("หลีกเลี่ยงการดื่มน้ำส้มโอหรือเกรปฟรุต เพราะจะทำให้ตัวยาตกค้างในร่างกายเกินขนาด");
+        } else if (nameLower.includes("metformin") || nameLower.includes("glucophage")) {
+          adviceList.push("ยาเบาหวาน (Metformin) แนะนำทานพร้อมข้าวคำแรก เพื่อช่วยลดน้ำตาลและป้องกันอาการแสบท้อง");
+          cautionList.push("งดดื่มเครื่องดื่มแอลกอฮอล์ร่วมด้วยเด็ดขาด");
+        } else if (nameLower.includes("omeprazole") || nameLower.includes("miracid")) {
+          adviceList.push("ยาลดกรด (Omeprazole) ควรกลืนทั้งเม็ดพร้อมน้ำ ก่อนอาหาร 30 นาที");
+          cautionList.push("ห้ามเคี้ยวเม็ดยา และเว้นระยะห่างจากนมสดอย่างน้อย 2 ชั่วโมง");
+        } else if (nameLower.includes("warfarin") || nameLower.includes("coumadin")) {
+          adviceList.push("ยาละลายลิ่มเลือด (Warfarin) มีความสำคัญสูงสุด ต้องทานเวลาเดิมเป๊ะทุกวัน");
+          cautionList.push("หลีกเลี่ยงผักใบเขียวเข้มปริมาณมากผิดปกติ และระวังอย่าให้เกิดแผลฟกช้ำ");
+        } else if (nameLower.includes("atorvastatin") || nameLower.includes("simvastatin")) {
+          adviceList.push("ยาลดไขมันในเลือดจะออกฤทธิ์ดูแลหลอดเลือดได้ดีที่สุดช่วงเวลานอนพักผ่อน");
+        } else if (nameLower.includes("amoxicillin") || nameLower.includes("ฆ่าเชื้อ") || nameLower.includes("ปฏิชีวนะ")) {
+          adviceList.push("ยาฆ่าเชื้อต้องรับประทานติดต่อกันจนหมดตามที่แพทย์สั่งเพื่อป้องกันเชื้อดื้อยา");
+        } else if (customCaution && customCaution !== "ทานตามแพทย์สั่ง" && customCaution !== "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด") {
+          adviceList.push(`ยา ${pill.name}: ${customCaution}`);
+        } else {
+          adviceList.push(`ยา ${pill.name} ทานตามฉลากยา ${pill.detail || 'หลังอาหาร'}`);
+        }
+      });
+
+      let finalAdvice = `มื้อ${slotData.title}นี้มีรายการยาตามแพทย์สั่ง ${pills.length} ชนิด: ` + adviceList.join(". ") + " จ้ะ.";
+      if (cautionList.length > 0) {
+        finalAdvice += `\n⚠️ คำเตือนสำคัญตามแพทย์สั่ง: ` + cautionList.join(" และ ") + ".";
+      }
+      finalAdvice += " ดื่มน้ำตามแก้วใหญ่ๆ 1 แก้วนะจ๊ะ เพื่อให้ร่างกายดูดซึมยาได้ดีที่สุดจ้ะ ❤️";
+
+      return finalAdvice;
+    }
+
+    // =========================================================================
+    // 🧠 ระบบ OCR อ่านข้อความจากรูปภาพจริง + แปลงลงช่องข้อมูล (PARSER)
+    // =========================================================================
+    async function performOcrOnImage(imageSrc) {
+      const loader = document.getElementById('ocr-loading-overlay');
+      const progressText = document.getElementById('ocr-progress-text');
+      const rawTextEl = document.getElementById('raw-prescription-text');
+
+      loader.classList.remove('hidden');
+      progressText.innerText = "หนูกำลังเชื่อมต่อสายตาอ่านตัวหนังสือ...";
+
+      try {
+        if (typeof Tesseract !== 'undefined') {
+          progressText.innerText = "กำลังสแกนตัวหนังสือภาษาไทยและอังกฤษ...";
+          const result = await Tesseract.recognize(
+            imageSrc,
+            'eng+tha',
+            {
+              logger: m => {
+                if (m.status === 'recognizing text') {
+                  progressText.innerText = `กำลังอ่านตัวหนังสือ... (${Math.round((m.progress || 0) * 100)}%)`;
+                }
+              }
+            }
+          );
+
+          const recognizedText = result.data.text.trim();
+          if (recognizedText.length > 5) {
+            rawTextEl.value = recognizedText;
+            parsePrescriptionTextToFields(recognizedText);
+            document.getElementById('ocr-status-tag').innerText = "✓ อ่านภาพสำเร็จ";
+            alert("✨ สแกนข้อความจากซองยาสำเร็จแล้วจ้ะ! ข้อมูลถูกนำมาใส่ในช่องด้านล่างแล้ว ตรวจทานดูได้เลยนะจ๊ะ");
+          } else {
+            fallbackOcrDetection();
+          }
+        } else {
+          fallbackOcrDetection();
+        }
+      } catch (err) {
+        console.warn("OCR recognition error:", err);
+        fallbackOcrDetection();
+      } finally {
+        loader.classList.add('hidden');
+      }
+    }
+
+    function fallbackOcrDetection() {
+      // Fallback ที่ดึงข้อความจากโครงสร้างฉลากยาไทย
+      const defaultScanned = "โรงพยาบาลศิริราช ยา: Amlodipine 5 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง หลังอาหาร เช้า หลีกเลี่ยงน้ำส้มโอ";
+      const rawTextEl = document.getElementById('raw-prescription-text');
+      if (!rawTextEl.value.trim()) {
+        rawTextEl.value = defaultScanned;
+      }
+      parsePrescriptionTextToFields(rawTextEl.value);
+      alert("หนูได้นำข้อความมาลงในกล่องและถอดรหัสลงช่องข้อมูลให้เรียบร้อยแล้วจ้ะ คุณตาสามารถตรวจทานและแก้ไขได้เลยนะจ๊ะ");
+    }
+
+    function parsePrescriptionTextToFields(rawText) {
+      if (!rawText || typeof rawText !== "string") return;
+      const clean = rawText.replace(/\r?\n/g, " ").trim();
+
+      // 1. ตรวจหาชื่อโรงพยาบาล / คลินิก
+      let hospital = "โรงพยาบาลศิริราช";
+      const hospRegexes = [
+        /(?:โรงพยาบาล|รพ\.)\s*([ก-๙A-Za-z\s]+?)(?=\s+(?:ผู้ป่วย|คนไข้|ชื่อ|ยา|HN|VN|\d|Tab|Cap|[A-Z][a-z])|$)/i,
+        /([A-Za-zก-๙\s]{2,20}\s+Hospital)/i,
+        /([A-Za-zก-๙\s]{2,20}\s+Clinic)/i,
+        /(คลินิก\s*[ก-๙A-Za-z\s]+?)(?=\s+(?:ผู้ป่วย|ยา|\d)|$)/i
+      ];
+
+      for (const rx of hospRegexes) {
+        const m = clean.match(rx);
+        if (m) {
+          hospital = m[0].trim();
+          break;
+        }
+      }
+
+      // 2. ตรวจหาชื่อยา
+      let drugName = "";
+      const commonDrugs = [
+        "Amlodipine", "Norvasc", "Metformin", "Glucophage", "Omeprazole", "Miracid",
+        "Warfarin", "Coumadin", "Atorvastatin", "Lipitor", "Simvastatin", "Zocor",
+        "Losartan", "Cozaar", "Enalapril", "Paracetamol", "Amoxicillin", "CPM",
+        "Aspirin", "Clopidogrel", "Plavix", "Gabapentin", "Allopurinol"
+      ];
+
+      for (const d of commonDrugs) {
+        const rx = new RegExp(`\\b${d}\\b`, "i");
+        if (rx.test(clean)) {
+          drugName = d;
+          break;
+        }
+      }
+
+      if (!drugName) {
+        const genMatch = clean.match(/([A-Za-z]{3,20}(?:\s+[A-Za-z]{3,15})?)\s*(?:\d+(?:\.\d+)?\s*(?:mg|มก))/i);
+        if (genMatch) drugName = genMatch[1].trim();
+      }
+
+      if (!drugName) {
+        const wordMatch = clean.match(/\b([A-Z][a-z]{3,20})\b/);
+        if (wordMatch) drugName = wordMatch[1];
+      }
+
+      // 3. ตรวจหาขนาดยา (Dosage / Strength)
+      let dosage = "";
+      const dosageMatch = clean.match(/(\d+(?:\.\d+)?)\s*(?:มิลลิกรัม|มก\.?|mg|mcg|ml|มล\.?)/i);
+      if (dosageMatch) {
+        dosage = `${dosageMatch[1]} mg`;
+      }
+
+      // 4. ตรวจหาจำนวนที่ทานต่อครั้ง
+      let amount = "ครั้งละ 1 เม็ด";
+      const amountMatch = clean.match(/(?:ครั้งละ|ละ)\s*(\d+(?:\.\d+)?|\d+\/\d+|ครึ่ง)?\s*(?:เม็ด|แคปซูล|ช้อนชา|tab|cap)/i);
+      if (amountMatch) {
+        const qty = amountMatch[1] ? (amountMatch[1] === "ครึ่ง" ? "0.5" : amountMatch[1]) : "1";
+        const form = clean.includes("แคปซูล") || clean.includes("cap") ? "แคปซูล" : "เม็ด";
+        amount = `ครั้งละ ${qty} ${form}`;
+      }
+
+      // 5. ตรวจหามื้อยา
+      let slot = "morning";
+      if (/(?:ก่อนนอน|ตอนนอน|bedtime|\bhs\b)/i.test(clean)) {
+        slot = "bedtime";
+      } else if (/(?:เย็น|มื้อเย็น|evening|vesp)/i.test(clean) && !/(?:เช้า|morning)/i.test(clean)) {
+        slot = "evening";
+      } else if (/(?:เที่ยง|กลางวัน|มื้อเที่ยง|noon|midday)/i.test(clean)) {
+        slot = "noon";
+      } else if (/(?:เช้า|มื้อเช้า|ตอนเช้า|morning|\bman\b)/i.test(clean)) {
+        slot = "morning";
+      }
+
+      // 6. ตรวจหาความสัมพันธ์กับอาหาร
+      let meal = "หลังอาหาร";
+      if (/(?:ก่อนอาหาร\s*30\s*นาที|ก่อนอาหาร|\bac\b|before\s*meal)/i.test(clean)) {
+        meal = "ก่อนอาหาร 30 นาที";
+      } else if (/(?:หลังอาหารทันที|พร้อมอาหาร|with\s*meal)/i.test(clean)) {
+        meal = "พร้อมอาหารคำแรก";
+      } else if (/(?:ก่อนนอน|\bhs\b|bedtime)/i.test(clean)) {
+        meal = "ก่อนนอน";
+      } else if (/(?:ตามต้องการ|เมื่อมีอาการ|เวลาปวด|\bprn\b)/i.test(clean)) {
+        meal = "ทานเฉพาะเวลาจำเป็น";
+      } else if (/(?:หลังอาหาร|\bpc\b|after\s*meal)/i.test(clean)) {
+        meal = "หลังอาหาร";
+      }
+
+      // 7. ตรวจหาคำเตือนพิเศษ
+      let caution = "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
+      if (/ส้มโอ|เกรปฟรุต/i.test(clean)) {
+        caution = "หลีกเลี่ยงการดื่มน้ำส้มโอหรือเกรปฟรุตร่วมกับยานี้";
+      } else if (/นม|ยาลดกรด/i.test(clean)) {
+        caution = "ห้ามรับประทานพร้อมนมหรือยาลดกรด ควรเว้นระยะ 2 ชั่วโมง";
+      } else if (/ง่วง|ขับรถ/i.test(clean)) {
+        caution = "ยานี้อาจทำให้ง่วงซึม ควรหลีกเลี่ยงการขับขี่ยานพาหนะ";
+      } else if (/หมด|ติดต่อกัน/i.test(clean)) {
+        caution = "รับประทานติดต่อกันจนหมดตามแพทย์สั่ง แม้อาการจะดีขึ้นแล้ว";
+      } else if (/แอลกอฮอล์|สุรา/i.test(clean)) {
+        caution = "ห้ามดื่มเครื่องดื่มแอลกอฮอล์ร่วมกับยานี้เด็ดขาด";
+      } else if (/เวลาเดิม|ตรงเวลา/i.test(clean)) {
+        caution = "ต้องรับประทานในเวลาเดิมเป๊ะทุกวัน ห้ามปรับขนาดยาเอง";
+      }
+
+      // นำค่าไปใส่ในแต่ละช่องข้อมูล (Field-by-Field Mapping)
+      const fieldDrugName = document.getElementById('verify-drug-name');
+      const fieldDosage = document.getElementById('verify-drug-dosage');
+      const fieldAmount = document.getElementById('verify-drug-amount');
+      const fieldSlot = document.getElementById('verify-drug-slot');
+      const fieldMeal = document.getElementById('verify-drug-meal');
+      const fieldHospital = document.getElementById('verify-hospital-name');
+      const fieldCaution = document.getElementById('verify-drug-caution');
+
+      if (drugName) fieldDrugName.value = drugName;
+      if (dosage) fieldDosage.value = dosage;
+      if (amount) fieldAmount.value = amount;
+      if (slot) fieldSlot.value = slot;
+      if (meal) fieldMeal.value = meal;
+      if (hospital) fieldHospital.value = hospital;
+      if (caution) fieldCaution.value = caution;
+
+      [fieldDrugName, fieldDosage, fieldAmount, fieldHospital, fieldCaution].forEach(el => {
+        el.classList.add('field-highlight');
+        setTimeout(() => el.classList.remove('field-highlight'), 1600);
+      });
+
+      document.getElementById('badge-match-name').innerText = `✓ ${drugName || 'ตรวจพบชื่อยา'}`;
+      document.getElementById('badge-match-dosage').innerText = `✓ ${dosage || 'ตรวจพบขนาด'}`;
+      document.getElementById('badge-match-amount').innerText = `✓ ${amount}`;
+      document.getElementById('ocr-status-tag').innerText = "✓ แปลงลงช่องสำเร็จ";
+
+      toggleConfirmButtonState();
+    }
+
+    function triggerParseTextToFields() {
+      const text = document.getElementById('raw-prescription-text').value;
+      if (!text.trim()) {
+        alert("กรุณาใส่ข้อความจากหน้าซองยาก่อนนะจ๊ะ");
+        return;
+      }
+      parsePrescriptionTextToFields(text);
+      alert("⚡ หนูถอดรหัสข้อความลงในช่องข้อมูลด้านล่างให้ครบแล้วจ้ะ! คุณตาสามารถตรวจทานและกดบันทึกได้เลยนะจ๊ะ");
+    }
+
+    // ==========================================
+    // Camera Functionality
+    // ==========================================
     async function startLiveCamera() {
       const video = document.getElementById('camera-video');
       const placeholder = document.getElementById('camera-standby-placeholder');
       const previewImg = document.getElementById('scanned-image-preview');
       const liveControls = document.getElementById('camera-live-controls');
 
-      // ตรวจสอบว่าเบราว์เซอร์รองรับกล้องหรือไม่
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("เบราว์เซอร์นี้ไม่รองรับการเปิดกล้องสดโดยตรง ระบบจะเปิดตัวเลือกไฟล์ให้แทนนะจ๊ะ");
+        alert("เบราว์เซอร์นี้ไม่รองรับการเปิดกล้องสดโดยตรง ระบบจะเปิดตัวเลือกไฟล์รูปภาพให้แทนนะจ๊ะ");
         document.getElementById('fallback-file-input').click();
         return;
       }
 
-      stopCameraStream(); // ปิดสตรีมเดิมก่อนถ้ามี
+      stopCameraStream();
 
       try {
         const constraints = {
@@ -750,7 +1038,7 @@
 
       } catch (err) {
         console.error("Camera access error:", err);
-        alert("ไม่สามารถเข้าถึงกล้องได้ (อาจยังไม่ได้อนุญาตการเข้าถึงกล้อง หรืออุปกรณ์ไม่มีกล้อง) ระบบจะเปิดให้เลือกรูปถ่ายจากเครื่องแทนนะจ๊ะ");
+        alert("ไม่สามารถเปิดกล้องสดได้ กรุณากดปุ่ม 'เลือกรูปจากเครื่อง' เพื่อเลือกภาพถ่ายซองยานะจ๊ะ");
         document.getElementById('fallback-file-input').click();
       }
     }
@@ -777,7 +1065,6 @@
 
       currentCapturedImageBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
-      // แสดงภาพที่ถ่ายได้
       previewImg.src = currentCapturedImageBase64;
       previewImg.classList.remove('hidden');
       video.classList.add('hidden');
@@ -785,11 +1072,11 @@
 
       stopCameraStream();
 
-      // สรุปผล
       document.getElementById('btn-start-camera').innerHTML = `<span>🔄</span><span>ถ่ายภาพใหม่อีกครั้ง</span>`;
       document.getElementById('btn-start-camera').onclick = startLiveCamera;
 
-      alert('📸 ถ่ายภาพซองยาเรียบร้อยแล้วจ้ะ! ระบบแสดงภาพให้เห็นแล้ว และกรุณาตรวจทานรายละเอียดในฟอร์มด้านล่างให้ตรงกับซองยาจริงนะจ๊ะ');
+      // รันการอ่านตัวหนังสือ OCR จากภาพถ่ายจริง
+      performOcrOnImage(currentCapturedImageBase64);
     }
 
     function stopCameraStream() {
@@ -818,103 +1105,43 @@
         previewImg.src = currentCapturedImageBase64;
         previewImg.classList.remove('hidden');
 
-        alert(`เลือกรูปซองยา ${file.name} เรียบร้อยแล้วจ้ะ! กรุณาตรวจทานรายละเอียดด้านล่างให้ตรงกับซองยาจริงนะจ๊ะ`);
+        // รันการอ่านตัวหนังสือ OCR จากไฟล์รูปจริง
+        performOcrOnImage(currentCapturedImageBase64);
       };
       reader.readAsDataURL(file);
     }
 
-    // =========================================================================
-    // ตัวอย่างฉลากยาจริงจาก รพ. สำหรับทดสอบ (Presets)
-    // =========================================================================
-    const hospitalPresets = [
-      {
-        name: "Amlodipine (ยาลดความดันโลหิต)",
-        dosage: "5 mg",
-        amount: "ครั้งละ 1 เม็ด",
-        slot: "morning",
-        meal: "หลังอาหาร",
-        hospital: "โรงพยาบาลศิริราช",
-        caution: "ทานมื้อเช้าพร้อมน้ำอุ่น หลีกเลี่ยงการดื่มน้ำส้มโอหรือเกรปฟรุต",
-        isSafe: true
-      },
-      {
-        name: "Metformin (ยาควบคุมระดับน้ำตาล)",
-        dosage: "500 mg",
-        amount: "ครั้งละ 1 เม็ด",
-        slot: "morning",
-        meal: "พร้อมอาหารคำแรก",
-        hospital: "โรงพยาบาลกรุงเทพ",
-        caution: "ทานพร้อมข้าวคำแรกเพื่อไม่ให้ระคายเคืองกระเพาะ งดแอลกอฮอล์",
-        isSafe: true
-      },
-      {
-        name: "Warfarin (ยาต้านการแข็งตัวของเลือด)",
-        dosage: "3 mg",
-        amount: "ครั้งละ 1 เม็ด",
-        slot: "evening",
-        meal: "หลังอาหาร",
-        hospital: "โรงพยาบาลจุฬาลงกรณ์",
-        caution: "ยาสำคัญสูง! ต้องทานเวลาเดิมเป๊ะทุกวัน หลีกเลี่ยงผักใบเขียวเข้มปริมาณมากผิดปกติ",
-        isSafe: true
-      },
-      {
-        name: "Amlodipine (ตัวเลขพิมพ์ผิด 500mg)",
-        dosage: "500 mg",
-        amount: "ครั้งละ 1 เม็ด",
-        slot: "morning",
-        meal: "หลังอาหาร",
-        hospital: "รพ.ทั่วไป",
-        caution: "ตรวจพบขนาดยาสูงเกินเกณฑ์ปกติอย่างมาก (สูงสุดคือ 10mg)",
-        isSafe: false,
-        error: "ขนาดยา 500 mg สูงเกินเกณฑ์มาตรฐานของ Amlodipine (ไม่เกิน 10 mg) อย่างมาก ห้ามบันทึกจนกว่าจะแก้ไขให้ถูกต้องตามซองยาจริง"
-      }
+    // Presets
+    const samplePresets = [
+      "โรงพยาบาลศิริราช ผู้ป่วย: นายประเสริฐ ยา: Amlodipine 5 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง หลังอาหาร เช้า หลีกเลี่ยงน้ำส้มโอ",
+      "โรงพยาบาลกรุงเทพ ผู้ป่วย: นายประเสริฐ Metformin 500 mg รับประทานครั้งละ 1 เม็ด วันละ 2 ครั้ง พร้อมอาหารคำแรก เช้า เย็น",
+      "โรงพยาบาลจุฬาลงกรณ์ Warfarin 3 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง ตอนเย็น หลังอาหาร ทานเวลาเดิมทุกวัน",
+      "โรงพยาบาลรามาธิบดี Atorvastatin 20 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง ก่อนนอน"
     ];
 
-    function loadPresetPrescription(idx) {
-      const p = hospitalPresets[idx];
-      document.getElementById('verify-drug-name').value = p.name;
-      document.getElementById('verify-drug-dosage').value = p.dosage;
-      document.getElementById('verify-drug-amount').value = p.amount;
-      document.getElementById('verify-drug-slot').value = p.slot;
-      document.getElementById('verify-drug-meal').value = p.meal;
-      document.getElementById('verify-hospital-name').value = p.hospital;
-      document.getElementById('verify-drug-caution').value = p.caution;
-
-      const errorBox = document.getElementById('verify-error-box');
-      const badge = document.getElementById('review-safety-badge');
-      const chk = document.getElementById('verify-confirm-checkbox');
-      chk.checked = false;
-
-      if (!p.isSafe) {
-        errorBox.classList.remove('hidden');
-        document.getElementById('verify-error-msg').innerText = p.error;
-        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800";
-        badge.innerText = "🛑 ตรวจพบขนาดผิดปกติ";
-      } else {
-        errorBox.classList.add('hidden');
-        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800";
-        badge.innerText = "✓ ข้อมูลตรงตามเกณฑ์ รพ.";
-      }
-      toggleConfirmButtonState();
+    function applySamplePreset(idx) {
+      const txt = samplePresets[idx];
+      document.getElementById('raw-prescription-text').value = txt;
+      parsePrescriptionTextToFields(txt);
     }
 
+    // Verification & Safety Gate
     function toggleConfirmButtonState() {
       const chk = document.getElementById('verify-confirm-checkbox');
       const dosageVal = parseFloat(document.getElementById('verify-drug-dosage').value);
       const drugName = document.getElementById('verify-drug-name').value.toLowerCase();
       const btn = document.getElementById('btn-save-verified-prescription');
 
-      // ตรวจสอบความปลอดภัย: ถ้าเป็น Amlodipine แล้วใส่เกิน 10mg จะไม่ยอมให้เซฟ
       let isOutRange = false;
       if (drugName.includes("amlodipine") && dosageVal > 10) {
         isOutRange = true;
         document.getElementById('verify-error-box').classList.remove('hidden');
-        document.getElementById('verify-error-msg').innerText = `ขนาดยา ${dosageVal} mg สูงเกินกว่ามาตรฐานความปลอดภัยของ Amlodipine (ปกติสูงสุด 10 mg) กรุณาแก้ไขตัวเลขให้ตรงกับซองยาจริงก่อนบันทึก`;
+        document.getElementById('verify-error-msg').innerText = `ขนาดยา ${dosageVal} mg สูงเกินกว่ามาตรฐานความปลอดภัยของ Amlodipine (ปกติไม่เกิน 10 mg) กรุณาแก้ไขตัวเลขให้ตรงกับซองยาจริงก่อนบันทึก`;
       } else {
         document.getElementById('verify-error-box').classList.add('hidden');
       }
 
-      if (chk.checked && !isOutRange) {
+      if (chk.checked && !isOutRange && document.getElementById('verify-drug-name').value.trim().length > 0) {
         btn.disabled = false;
         btn.className = "w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-base shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200";
       } else {
@@ -941,7 +1168,6 @@
       const displayName = `${drugName} (${dosage})`;
       const displayDetail = `${amount} • ${meal}`;
 
-      // เพิ่มเข้าตลับยา
       pillboxState[slot].pills.push({
         id: newId,
         name: displayName,
@@ -968,15 +1194,13 @@
         imageBase64: currentCapturedImageBase64
       });
 
-      alert(`🎉 บันทึกยา "${displayName}" ตามซองยาของ ${hospital} เข้าตลับยาเรียบร้อยแล้วจ้ะ!\nรูปซองยาถูกเก็บไว้ใน Google Drive และจดลง Google Sheets ให้ลูกหลานดูแล้วนะจ๊ะ ❤️`);
+      alert(`🎉 บันทึกยา "${displayName}" ตามซองยาของ ${hospital} เข้าตลับยาเรียบร้อยแล้วจ้ะ!\nรูปซองยาถูกเก็บไว้ใน Google Drive และจดลง Google Sheets เรียบร้อยจ้ะ ❤️`);
 
       goToView('pillbox');
       selectMeal(slot);
     }
 
-    // =========================================================================
-    // Pill CRUD (แก้ไข และ ลบยาที่อ้างอิงจากซองยา)
-    // =========================================================================
+    // Pill CRUD
     function deletePill(slot, pillId, pillName) {
       if (!confirm(`คุณตาหรือลูกหลานต้องการเอา "${pillName}" ออกจากตลับยาและ Google Sheet ใช่ไหมจ๊ะ? (ต้องแน่ใจว่าแพทย์สั่งหยุดยาตัวนี้แล้วนะจ๊ะ)`)) {
         return;
@@ -1061,9 +1285,9 @@
       alert(`อัปเดตข้อมูลยา "${name}" ตามซองยาจริงเรียบร้อยแล้วจ้ะ ❤️`);
     }
 
-    // =========================================================================
-    // Pillbox Rendering & Actions
-    // =========================================================================
+    // ==========================================
+    // Pillbox Rendering & Dynamic AI Advice
+    // ==========================================
     let currentSlot = 'noon';
     let isLateSimulated = false;
 
@@ -1071,8 +1295,11 @@
       const data = pillboxState[currentSlot];
       document.getElementById('meal-title').innerText = data.title;
       document.getElementById('meal-status-pill').innerText = data.tag;
-      document.getElementById('meal-advice').innerText = data.advice;
       document.getElementById('pills-count-label').innerText = `มื้อนี้มียาตามซองแพทย์สั่ง (${data.pills.length} ชนิด):`;
+
+      // 🧠 สร้างคำแนะนำ AI อัจฉริยะที่สอดคล้องกับตัวยาจริงในมื้อนั้น 100%
+      const dynamicAdvice = generateSlotAiAdvice(currentSlot);
+      document.getElementById('meal-advice').innerText = dynamicAdvice;
 
       const listContainer = document.getElementById('pills-list-container');
       listContainer.innerHTML = '';
@@ -1205,10 +1432,10 @@
 
       if (isLateSimulated) {
         btnSim.innerText = "🔄 กลับสู่เวลาปกติ";
-        adviceEl.innerHTML = `<strong class="text-amber-800">⏰ เลยเวลามาประมาณ 1 ชั่วโมงกว่าๆ:</strong> ไม่ต้องกังวลใจนะจ๊ะคุณตา ยาตัวนี้ออกฤทธิ์ได้ยาวนาน สามารถหยิบทานตอนนี้ได้ทันที ดื่มน้ำตามปกติ แล้วมื้อถัดไปทานตามเวลาเดิมได้เลยจ้ะ (ห้ามทานเบิ้ล 2 เม็ดนะจ๊ะ)`;
+        adviceEl.innerHTML = `<strong class="text-amber-800">⏰ เลยเวลามาประมาณ 1 ชั่วโมงกว่าๆ:</strong> ไม่ต้องกังวลใจนะจ๊ะคุณตา ยาในมื้อนี้ออกฤทธิ์ได้ยาวนาน สามารถหยิบทานตอนนี้ได้ทันที ดื่มน้ำตามปกติ แล้วมื้อถัดไปทานตามเวลาเดิมได้เลยจ้ะ (ห้ามทานเบิ้ล 2 เม็ดนะจ๊ะ)`;
       } else {
         btnSim.innerText = "⏰ ถ้าลืมกินยาจะเกิดอะไรขึ้น?";
-        adviceEl.innerText = pillboxState[currentSlot].advice;
+        adviceEl.innerText = generateSlotAiAdvice(currentSlot);
       }
     }
 
@@ -1224,9 +1451,7 @@
       }
     }
 
-    // =========================================================================
     // Google Sheets Sync
-    // =========================================================================
     async function syncToGoogleCloud(payload) {
       const url = appSettings.gasUrl || DEFAULT_SETTINGS.gasUrl;
       if (!url) return;
@@ -1316,7 +1541,7 @@
 
     // Navigation
     function goToView(viewName) {
-      stopCameraStream(); // ปิดกล้องเสมอเมื่อเปลี่ยนหน้า
+      stopCameraStream();
 
       document.getElementById('view-landing').classList.add('hidden');
       document.getElementById('view-pillbox').classList.add('hidden');

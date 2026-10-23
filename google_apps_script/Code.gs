@@ -1,44 +1,33 @@
 /**
  * ==============================================================================
- * โค้ด Google Apps Script สำหรับ "ตลับยาใจดี" (Kind Pillbox)
+ * โค้ด Google Apps Script สำหรับ "ตลับยาใจดี" (Kind Pillbox) - เวอร์ชันอัจฉริยะ V2
  * เชื่อมโยงกับโฟลเดอร์ Google Drive: 18wXmBCqmDW1L79cvPObIFE-Wr4cvBZdt
- * รองรับ:
- * 1. บันทึกรูปซองยาลงโฟลเดอร์ Drive ที่กำหนด
- * 2. จัดการข้อมูลยา (เพิ่ม / แก้ไข / ลบ / ดึงรายการยาทั้งหมด) ทำงานร่วมกับแอปแบบสองทาง
- * 3. บันทึก Log การกินยา และการลืมกินยา พร้อมเวลาที่กำหนดและเวลาที่กินจริง
  * ==============================================================================
  */
 
-// โฟลเดอร์ Google Drive ที่ผู้ใช้กำหนด
 const TARGET_FOLDER_ID = "18wXmBCqmDW1L79cvPObIFE-Wr4cvBZdt";
-
-// ชื่อแท็บใน Google Sheets
 const SHEET_MEDS = "รายการยาในตลับ";
 const SHEET_LOGS = "บันทึกการกินยาและลืมยา";
 
-/**
- * จัดการคำขอแบบ GET (ดึงข้อมูลรายการยา และบันทึกประวัติ)
- */
 function doGet(e) {
   try {
     const action = e.parameter.action;
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. ดึงรายการยาทั้งหมดเพื่อไปแสดงในแอป
+    // ดึงรายการยาทั้งหมดเพื่อไปแสดงในแอป
     if (action === "GET_MEDICATIONS") {
       const sheet = getOrCreateMedsSheet(spreadsheet);
       const data = sheet.getDataRange().getValues();
       const medications = [];
 
-      // ข้ามหัวตาราง (แถวที่ 1)
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
-        if (row[0]) { // มี medId
+        if (row[0]) {
           medications.push({
             id: row[0],
             name: row[1],
             dosage: row[2],
-            slot: row[3], // morning, noon, evening, bedtime
+            slot: row[3],
             mealRelation: row[4],
             amount: row[5],
             advice: row[6],
@@ -52,7 +41,7 @@ function doGet(e) {
       return createJsonResponse({ success: true, medications: medications });
     }
 
-    // 2. ดึงประวัติ Log ล่าสุด
+    // ดึงประวัติ Log ล่าสุด
     if (action === "GET_LOGS") {
       const sheet = getOrCreateLogsSheet(spreadsheet);
       const data = sheet.getDataRange().getValues();
@@ -79,7 +68,7 @@ function doGet(e) {
 
     return createJsonResponse({
       status: "online",
-      service: "ตลับยาใจดี Google Apps Script API",
+      service: "ตลับยาใจดี Google Apps Script API V2",
       folderId: TARGET_FOLDER_ID,
       time: new Date()
     });
@@ -89,22 +78,16 @@ function doGet(e) {
   }
 }
 
-/**
- * จัดการคำขอแบบ POST (เพิ่มยา, แก้ไขยา, ลบยา, และจด Log การกินยา/ลืมกินยา)
- */
 function doPost(e) {
   try {
     const rawData = e.postData ? e.postData.contents : "{}";
     const data = JSON.parse(rawData);
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
-    // --------------------------------------------------------------------------
-    // ACTION 1: บันทึกซองยาใหม่ / เพิ่มยาเข้าตลับยา (ADD_MEDICATION / SAVE_PRESCRIPTION)
-    // --------------------------------------------------------------------------
+    // 1. เพิ่มยาใหม่ / บันทึกซองยาพร้อมรูปเข้า Google Drive
     if (data.action === "SAVE_PRESCRIPTION" || data.action === "ADD_MEDICATION") {
       let imageUrl = "-";
 
-      // อัปโหลดรูปลง Google Drive Folder ที่กำหนด
       if (data.imageBase64) {
         imageUrl = saveImageToDrive(data.imageBase64, data.drugName);
       }
@@ -117,7 +100,7 @@ function doPost(e) {
         medId,
         data.drugName || "ไม่ระบุชื่อยา",
         data.dosage || "-",
-        data.slot || "morning", // morning, noon, evening, bedtime
+        data.slot || "morning",
         data.mealRelation || "หลังอาหาร",
         data.amount || "ครั้งละ 1 เม็ด",
         data.cautions || data.advice || "-",
@@ -134,9 +117,7 @@ function doPost(e) {
       });
     }
 
-    // --------------------------------------------------------------------------
-    // ACTION 2: แก้ไขข้อมูลยา (UPDATE_MEDICATION)
-    // --------------------------------------------------------------------------
+    // 2. แก้ไขข้อมูลยา
     if (data.action === "UPDATE_MEDICATION") {
       const sheet = getOrCreateMedsSheet(spreadsheet);
       const values = sheet.getDataRange().getValues();
@@ -144,7 +125,7 @@ function doPost(e) {
 
       for (let i = 1; i < values.length; i++) {
         if (values[i][0] === data.id) {
-          foundRow = i + 1; // 1-based index
+          foundRow = i + 1;
           break;
         }
       }
@@ -159,15 +140,12 @@ function doPost(e) {
         if (data.pillColorShape) sheet.getRange(foundRow, 9).setValue(data.pillColorShape);
         sheet.getRange(foundRow, 10).setValue(Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss"));
 
-        return createJsonResponse({ success: true, message: "แก้ไขข้อมูลยาในตลับเรียบร้อยแล้วจ้ะ" });
-      } else {
-        return createJsonResponse({ success: false, message: "ไม่พบรหัสยานี้ในตารางจ้ะ" });
+        return createJsonResponse({ success: true, message: "แก้ไขข้อมูลยาเรียบร้อยแล้วจ้ะ" });
       }
+      return createJsonResponse({ success: false, message: "ไม่พบรหัสยานี้" });
     }
 
-    // --------------------------------------------------------------------------
-    // ACTION 3: ลบยาออกจากตลับยา (DELETE_MEDICATION)
-    // --------------------------------------------------------------------------
+    // 3. ลบยาออกจากตลับยา
     if (data.action === "DELETE_MEDICATION") {
       const sheet = getOrCreateMedsSheet(spreadsheet);
       const values = sheet.getDataRange().getValues();
@@ -182,15 +160,12 @@ function doPost(e) {
 
       if (foundRow > 0) {
         sheet.deleteRow(foundRow);
-        return createJsonResponse({ success: true, message: "ลบยาออกจากตลับและ Google Sheet เรียบร้อยแล้วจ้ะ" });
-      } else {
-        return createJsonResponse({ success: false, message: "ไม่พบรหัสยาที่ต้องการลบจ้ะ" });
+        return createJsonResponse({ success: true, message: "ลบยาเรียบร้อยแล้วจ้ะ" });
       }
+      return createJsonResponse({ success: false, message: "ไม่พบรหัสยาที่จะลบ" });
     }
 
-    // --------------------------------------------------------------------------
-    // ACTION 4: บันทึก Log การกินยา และการลืมกินยา (LOG_TAKEN / LOG_MISSED)
-    // --------------------------------------------------------------------------
+    // 4. บันทึก Log การกินยา และการลืมกินยา
     if (data.action === "LOG_TAKEN" || data.action === "LOG_MISSED") {
       const sheet = getOrCreateLogsSheet(spreadsheet);
       const now = new Date();
@@ -208,10 +183,7 @@ function doPost(e) {
         data.caregiverName || "-"
       ]);
 
-      return createJsonResponse({
-        success: true,
-        message: "บันทึกประวัติการกินยาลง Google Sheet เรียบร้อยแล้วจ้ะ"
-      });
+      return createJsonResponse({ success: true, message: "บันทึกประวัติการกินยาลง Google Sheet สำเร็จจ้ะ" });
     }
 
     return createJsonResponse({ success: false, message: "ไม่พบคำสั่ง action ที่ระบุ" });
@@ -220,10 +192,6 @@ function doPost(e) {
     return createJsonResponse({ success: false, error: err.toString() });
   }
 }
-
-// --------------------------------------------------------------------------
-// Helper Functions
-// --------------------------------------------------------------------------
 
 function saveImageToDrive(base64Data, drugName) {
   try {
@@ -236,7 +204,7 @@ function saveImageToDrive(base64Data, drugName) {
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     return file.getUrl();
   } catch (e) {
-    return "เกิดข้อผิดพลาดในการบันทึกภาพ: " + e.toString();
+    return "ข้อผิดพลาด: " + e.toString();
   }
 }
 
@@ -245,16 +213,9 @@ function getOrCreateMedsSheet(spreadsheet) {
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_MEDS);
     sheet.appendRow([
-      "รหัสยา (ID)",
-      "ชื่อยา",
-      "ขนาดยา (mg)",
-      "มื้อยา (morning/noon/evening/bedtime)",
-      "ความสัมพันธ์กับอาหาร",
-      "จำนวนที่ทาน",
-      "คำแนะนำพิเศษ/ข้อควรระวัง",
-      "ลิงก์รูปซองยาใน Google Drive",
-      "ไอคอน/สีเม็ดยา",
-      "อัปเดตล่าสุด"
+      "รหัสยา (ID)", "ชื่อยา", "ขนาดยา (mg)", "มื้อยา (morning/noon/evening/bedtime)",
+      "ความสัมพันธ์กับอาหาร", "จำนวนที่ทาน", "คำแนะนำพิเศษ/ข้อควรระวัง",
+      "ลิงก์รูปซองยาใน Google Drive", "ไอคอน/สีเม็ดยา", "อัปเดตล่าสุด"
     ]);
     sheet.getRange(1, 1, 1, 10).setFontWeight("bold").setBackground("#E8F5E9");
     sheet.setFrozenRows(1);
@@ -267,16 +228,9 @@ function getOrCreateLogsSheet(spreadsheet) {
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_LOGS);
     sheet.appendRow([
-      "วันเวลาที่บันทึก",
-      "ชื่อผู้ป่วย",
-      "มื้อยา",
-      "รายการยาที่ทาน",
-      "เวลาที่ควรทานตามตาราง",
-      "เวลาที่ทานจริง",
-      "สถานะการทานยา",
-      "ระยะเวลาที่ล่าช้า",
-      "คำแนะนำที่ระบบให้",
-      "ผู้ดูแลที่ได้รับแจ้งเตือน"
+      "วันเวลาที่บันทึก", "ชื่อผู้ป่วย", "มื้อยา", "รายการยาที่ทาน",
+      "เวลาที่ควรทานตามตาราง", "เวลาที่ทานจริง", "สถานะการทานยา",
+      "ระยะเวลาที่ล่าช้า", "คำแนะนำที่ระบบให้", "ผู้ดูแลที่ได้รับแจ้งเตือน"
     ]);
     sheet.getRange(1, 1, 1, 10).setFontWeight("bold").setBackground("#FFF3E0");
     sheet.setFrozenRows(1);
