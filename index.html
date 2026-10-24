@@ -63,6 +63,12 @@
       0% { background-color: #DCFCE7; border-color: #22C55E; }
       100% { background-color: #FFFFFF; border-color: #E2E8F0; }
     }
+    .avatar-btn.selected {
+      background-color: #EAF2EC;
+      border-color: #3D7A5A;
+      box-shadow: 0 0 0 2px #3D7A5A;
+      transform: scale(1.08);
+    }
   </style>
 </head>
 <body class="min-h-screen bg-[#F8F5EE] flex flex-col justify-between font-body text-stone-800 antialiased selection:bg-amber-200">
@@ -75,8 +81,8 @@
     <!-- Top Sticky Header -->
     <header class="sticky top-0 z-30 bg-[#FBF9F5]/90 backdrop-blur-md px-5 pt-4 pb-3 border-b border-stone-200/60 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 rounded-2xl bg-[#EAF2EC] flex items-center justify-center text-xl shadow-inner border border-[#D5E5D9]">
-          💊
+        <div id="header-avatar-badge" class="w-10 h-10 rounded-2xl bg-[#EAF2EC] flex items-center justify-center text-xl shadow-inner border border-[#D5E5D9]">
+          👴🏻
         </div>
         <div>
           <h1 class="font-heading font-medium text-lg leading-tight text-[#234E37] flex items-center gap-1.5">
@@ -99,8 +105,8 @@
     <!-- ========================================== -->
     <section id="view-landing" class="p-5 space-y-5">
       <div class="soft-card p-6 space-y-4 text-center border-amber-100/60">
-        <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-4xl shadow-inner">
-          🌿
+        <div id="landing-avatar-icon" class="w-20 h-20 mx-auto rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-4xl shadow-inner">
+          👴🏻
         </div>
         <div class="space-y-1">
           <span class="text-xs font-bold text-amber-800 uppercase tracking-wider bg-amber-100/80 px-3 py-1 rounded-full">
@@ -109,7 +115,7 @@
           <h2 id="landing-greeting-title" class="font-heading text-2xl font-semibold text-stone-800 pt-2">
             สวัสดีจ้ะคุณตาประเสริฐ
           </h2>
-          <p class="text-sm text-stone-600 leading-relaxed max-w-xs mx-auto">
+          <p id="landing-subtext" class="text-sm text-stone-600 leading-relaxed max-w-xs mx-auto">
             วันนี้หนูจัดเตรียมยาตามที่แพทย์และโรงพยาบาลจัดสรรไว้ให้เรียบร้อยแล้ว ทานตามเวลาเพื่อสุขภาพที่แข็งแรงนะจ๊ะ
           </p>
         </div>
@@ -123,7 +129,7 @@
               <p class="text-xs text-emerald-700">ทานตรงเวลา ร่างกายสดชื่นแข็งแรง</p>
             </div>
           </div>
-          <span class="text-base font-bold font-heading text-emerald-800 bg-white px-2.5 py-1 rounded-xl shadow-sm border border-emerald-100">
+          <span id="landing-health-shield" class="text-base font-bold font-heading text-emerald-800 bg-white px-2.5 py-1 rounded-xl shadow-sm border border-emerald-100">
             95%
           </span>
         </div>
@@ -131,7 +137,7 @@
         <div class="pt-2 space-y-2.5">
           <button onclick="goToView('pillbox')" class="w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-lg shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>💊</span>
-            <span>เปิดดูตลับยาวันนี้</span>
+            <span id="landing-btn-open-pillbox">เปิดดูตลับยาวันนี้</span>
           </button>
           <button onclick="goToView('scanner')" class="w-full py-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 active:scale-[0.98] text-amber-900 border border-amber-200 font-heading font-medium text-sm flex items-center justify-center gap-2 transition duration-200">
             <span>📷</span>
@@ -147,7 +153,7 @@
             👧🏻
           </div>
           <div>
-            <p class="text-xs text-stone-500 font-medium">ลูกหลานผู้ดูแลของคุณตา:</p>
+            <p id="landing-caregiver-label" class="text-xs text-stone-500 font-medium">ลูกหลานผู้ดูแลของคุณตา:</p>
             <p id="landing-caregiver-name" class="font-heading text-sm font-semibold text-stone-800">
               น้องก้อย (ลูกสาว)
             </p>
@@ -212,14 +218,16 @@
           </span>
         </div>
 
-        <!-- รายการเม็ดยาที่มีเอกสารอ้างอิงจากซองยาจริง -->
+        <!-- รายการเม็ดยาที่มีเอกสารอ้างอิงจากซองยาจริง + ปุ่มติ๊กกินรายตัว -->
         <div class="space-y-2.5">
           <div class="flex items-center justify-between">
-            <p id="pills-count-label" class="text-xs font-medium text-stone-500">มื้อนี้มียาตามซองแพทย์สั่งดังนี้จ้ะ:</p>
+            <p id="pills-count-label" class="text-xs font-medium text-stone-500">มื้อนี้มียาตามแพทย์สั่ง (กดทานทีละตัว หรือทานทั้งมื้อได้จ้ะ):</p>
             <span class="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md font-semibold border border-emerald-200">
               🛡️ ยึดตามซองยา รพ.
             </span>
           </div>
+          
+          <!-- Pills List Container -->
           <div id="pills-list-container" class="space-y-2.5"></div>
         </div>
 
@@ -243,6 +251,7 @@
           </button>
         </div>
 
+        <!-- ปุ่มทานยาทั้งมื้อ -->
         <div class="pt-2">
           <button id="btn-take-pill" onclick="takeCurrentMeal()" class="w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-lg shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200">
             <span>✓</span>
@@ -491,7 +500,7 @@
     </section>
 
     <!-- ========================================== -->
-    <!-- VIEW 3: SETTINGS (การตั้งค่า & Gemini AI)  -->
+    <!-- VIEW 3: SETTINGS (การตั้งค่า, เรียกขาน, Gemini) -->
     <!-- ========================================== -->
     <section id="view-settings" class="hidden p-5 space-y-4">
       <div class="soft-card p-5 space-y-5">
@@ -502,16 +511,64 @@
               <h2 class="font-heading text-lg font-medium text-stone-800">
                 ตั้งค่าระบบ & การดูแล
               </h2>
-              <p class="text-xs text-stone-500">ข้อมูลผู้สูงอายุ, ตารางเวลา, และ AI เภสัชกร</p>
+              <p class="text-xs text-stone-500">การเรียกขาน, อิโมจิ, ตารางเวลา, และ AI เภสัชกร</p>
             </div>
           </div>
         </div>
 
-        <div class="space-y-3">
+        <!-- 1. การเรียกขาน & อิโมจิประจำตัว (Honorific & Avatar) -->
+        <div class="space-y-3 bg-[#FAF7F2] p-4 rounded-2xl border border-stone-200">
+          <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
+            <span>👤</span>
+            <span>ข้อมูลการเรียกขาน & อิโมจิประจำตัว</span>
+          </h3>
+
+          <!-- เลือกคำเรียกขาน -->
           <div class="space-y-1">
-            <label class="text-xs text-stone-600 font-medium">ชื่อผู้รับประทานยา (คุณตา/คุณยาย):</label>
-            <input type="text" id="setting-user-name" value="คุณตาประเสริฐ" class="w-full p-3 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#FCFAF7]">
+            <label class="text-xs text-stone-600 font-medium">คำเรียกขาน (เลือกความสัมพันธ์ในครอบครัว):</label>
+            <select id="setting-user-title" onchange="toggleCustomTitleInput()" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              <option value="คุณตา">👴🏻 คุณตา</option>
+              <option value="คุณยาย">👵🏻 คุณยาย</option>
+              <option value="คุณพ่อ">👨🏻 คุณพ่อ</option>
+              <option value="คุณแม่">👩🏻 คุณแม่</option>
+              <option value="คุณปู่">👴🏻 คุณปู่</option>
+              <option value="คุณย่า">👵🏻 คุณย่า</option>
+              <option value="คุณลุง">👨🏻 คุณลุง</option>
+              <option value="คุณป้า">👩🏻 คุณป้า</option>
+              <option value="คุณน้า">👩🏻 คุณน้า</option>
+              <option value="คุณอา">👨🏻 คุณอา</option>
+              <option value="custom">✏️ กำหนดคำเรียกขานเอง...</option>
+            </select>
+            <input type="text" id="setting-user-title-custom" placeholder="พิมพ์คำเรียกขานเอง เช่น หลวงพ่อ, อาจม, พี่สาว" class="hidden w-full p-2 rounded-xl border border-amber-300 text-xs bg-amber-50/50 mt-1">
           </div>
+
+          <!-- ชื่อ -->
+          <div class="space-y-1">
+            <label class="text-xs text-stone-600 font-medium">ชื่อของผู้รับประทานยา:</label>
+            <input type="text" id="setting-user-name" value="ประเสริฐ" placeholder="เช่น ประเสริฐ, สมศรี" class="w-full p-2.5 rounded-xl border border-stone-300 text-sm font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+          </div>
+
+          <!-- เลือกอิโมจิประจำตัว (Avatars) -->
+          <div class="space-y-1.5 pt-1">
+            <label class="text-xs text-stone-600 font-medium block">เลือกอิโมจิประจำตัวที่ชื่นชอบ:</label>
+            <div id="avatar-picker-grid" class="grid grid-cols-5 gap-2 pt-0.5">
+              <button type="button" onclick="selectUserAvatar('👴🏻')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">👴🏻</button>
+              <button type="button" onclick="selectUserAvatar('👵🏻')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">👵🏻</button>
+              <button type="button" onclick="selectUserAvatar('👨🏻')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">👨🏻</button>
+              <button type="button" onclick="selectUserAvatar('👩🏻')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">👩🏻</button>
+              <button type="button" onclick="selectUserAvatar('🧓🏻')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">🧓🏻</button>
+              <button type="button" onclick="selectUserAvatar('🌸')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">🌸</button>
+              <button type="button" onclick="selectUserAvatar('🌿')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">🌿</button>
+              <button type="button" onclick="selectUserAvatar('☕')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">☕</button>
+              <button type="button" onclick="selectUserAvatar('☀️')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">☀️</button>
+              <button type="button" onclick="selectUserAvatar('💖')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">💖</button>
+            </div>
+            <input type="hidden" id="setting-user-avatar" value="👴🏻">
+          </div>
+        </div>
+
+        <!-- 2. ข้อมูลผู้ดูแล -->
+        <div class="space-y-3">
           <div class="space-y-1">
             <label class="text-xs text-stone-600 font-medium">ชื่อลูกหลาน / ผู้ดูแลหลัก:</label>
             <input type="text" id="setting-caregiver-name" value="น้องก้อย (ลูกสาว)" class="w-full p-3 rounded-xl border border-stone-300 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-[#FCFAF7]">
@@ -532,7 +589,7 @@
           </div>
         </div>
 
-        <!-- ตารางเวลามื้อยาปกติของบ้าน (Meal Schedule Times) -->
+        <!-- 3. ตารางเวลามื้อยาปกติของบ้าน (Meal Schedule Times) -->
         <div class="space-y-2.5 pt-2 border-t border-stone-100">
           <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
             <span>⏰</span>
@@ -558,7 +615,7 @@
           </div>
         </div>
 
-        <!-- Google Gemini AI Integration -->
+        <!-- 4. Google Gemini AI Integration & Connection Tester -->
         <div class="space-y-2.5 pt-2 border-t border-stone-100">
           <div class="flex items-center justify-between">
             <h3 class="font-heading text-sm font-semibold text-indigo-950 flex items-center gap-1.5">
@@ -569,10 +626,28 @@
               ⚡ ระบบเภสัชวิทยาในเครื่อง (Offline)
             </span>
           </div>
+
           <div class="space-y-1">
             <label class="text-xs text-stone-600 font-medium">Gemini API Key (ฟรีจาก Google AI Studio):</label>
             <input type="password" id="setting-gemini-api-key" placeholder="วาง API Key เช่น AIzaSy..." class="w-full p-3 rounded-xl border border-indigo-200 text-xs text-stone-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-indigo-50/30 font-mono">
           </div>
+
+          <!-- ปุ่มทดสอบการเชื่อมต่อ Gemini API -->
+          <div class="pt-1 flex gap-2">
+            <button type="button" onclick="testGeminiConnection()" id="btn-test-gemini" class="flex-1 py-2.5 px-3 bg-gradient-to-r from-indigo-500 to-sky-600 hover:from-indigo-600 hover:to-sky-700 text-white rounded-xl font-heading text-xs font-semibold shadow flex items-center justify-center gap-1.5 transition">
+              <span>🧪</span>
+              <span>กดทดสอบการเชื่อมต่อ Gemini API เดี๋ยวนี้</span>
+            </button>
+            <a href="https://aistudio.google.com/" target="_blank" class="py-2.5 px-3 rounded-xl border border-indigo-200 text-indigo-800 hover:bg-indigo-50 text-xs font-medium flex items-center gap-1">
+              <span>🔑 ขอคีย์ฟรี</span>
+            </a>
+          </div>
+
+          <!-- กล่องแสดงผลลัพธ์การทดสอบ Gemini -->
+          <div id="gemini-test-result-box" class="hidden p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed">
+            <!-- Dynamic Result Content -->
+          </div>
+
           <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 text-[11px] text-indigo-900 space-y-1 leading-relaxed">
             <p class="font-semibold">💡 ข้อแนะนำเรื่อง AI API:</p>
             <p>
@@ -583,7 +658,7 @@
           </div>
         </div>
 
-        <!-- Google Cloud Integration (Sheets & Drive) -->
+        <!-- 5. Google Cloud Integration (Sheets & Drive) -->
         <div class="space-y-3 pt-2 border-t border-stone-100">
           <h3 class="font-heading text-sm font-semibold text-stone-800 flex items-center gap-1.5">
             <span>☁️</span>
@@ -617,6 +692,112 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ยืนยันการทานยาเรียบร้อยแล้ว (INTAKE CONFIRMATION POPUP)             -->
+  <!-- ========================================================================= -->
+  <div id="modal-intake-confirm" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-emerald-200 text-center animate-fade-in">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl shadow-inner">
+        🌟
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="font-heading text-lg font-semibold text-emerald-950">
+          บันทึกการทานยาเรียบร้อยแล้วจ้ะ!
+        </h3>
+        <p id="confirm-popup-subtitle" class="text-xs text-stone-500 font-medium">
+          สุขภาพแข็งแรง ร่างกายสดชื่นนะจ๊ะ
+        </p>
+      </div>
+
+      <!-- รายละเอียดเวลาและสถานะ -->
+      <div class="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 text-left text-xs space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-stone-600 font-medium">ช่วงเวลาที่ทาน:</span>
+          <span id="confirm-popup-time" class="font-bold text-emerald-900 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+            🕒 เวลา 08:15 น.
+          </span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-stone-600 font-medium">สถานะการทาน:</span>
+          <span id="confirm-popup-status" class="font-bold text-emerald-800">
+            ตรงเวลาปกติ 🟢
+          </span>
+        </div>
+      </div>
+
+      <!-- สรุปรายการยาที่ทานไปในรอบนี้ -->
+      <div class="space-y-1.5 text-left">
+        <p class="text-xs font-semibold text-stone-700">📋 รายการยาที่ทานไปในมื้อนี้:</p>
+        <div id="confirm-popup-pills-list" class="space-y-1 max-h-40 overflow-y-auto pr-1 text-xs">
+          <!-- Rendered pills -->
+        </div>
+      </div>
+
+      <p id="confirm-popup-encouragement" class="text-xs text-stone-600 leading-relaxed font-medium">
+        ชื่นใจจังเลยจ้ะคุณตา! หนูบันทึกลงตลับยา และจดเวลาทานยาเข้า Google Sheet ให้ลูกหลานสบายใจเรียบร้อยแล้วนะจ๊ะ ❤️
+      </p>
+
+      <div class="pt-2 flex gap-2">
+        <button onclick="speakConfirmPopup()" class="py-3 px-3 rounded-xl border border-stone-200 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center justify-center gap-1 transition">
+          <span>🔊</span>
+          <span>ฟังเสียง</span>
+        </button>
+        <button onclick="closeIntakeConfirmModal()" class="flex-1 py-3 bg-[#3D7A5A] hover:bg-[#32674B] text-white rounded-xl font-heading text-sm font-medium shadow-md flex items-center justify-center gap-1.5 transition">
+          <span>✓</span>
+          <span>ตกลง รับทราบแล้ว</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: แจ้งเตือนเมื่อกดทานซ้ำ (ALREADY TAKEN WARNING POPUP)              -->
+  <!-- ========================================================================= -->
+  <div id="modal-already-taken" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-amber-200 text-center animate-fade-in">
+      <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl shadow-inner">
+        🛑
+      </div>
+
+      <div class="space-y-1">
+        <h3 id="already-taken-title" class="font-heading text-lg font-semibold text-amber-950">
+          มื้อนี้คุณตาทานยาเรียบร้อยแล้วจ้ะ!
+        </h3>
+        <p id="already-taken-subtitle" class="text-xs text-amber-800 font-medium">
+          บันทึกไว้เมื่อเวลา 08:15 น. แล้วนะจ๊ะ
+        </p>
+      </div>
+
+      <div class="p-3 bg-amber-50/70 rounded-2xl border border-amber-200 text-left text-xs space-y-2">
+        <p class="font-bold text-amber-950 flex items-center gap-1">
+          <span>⚠️</span>
+          <span>คำแนะนำความปลอดภัยที่สำคัญ:</span>
+        </p>
+        <p class="text-stone-700 leading-relaxed text-[11px]">
+          เพื่อความปลอดภัยสูงสุดของร่างกาย <strong>ไม่ต้องทานยานี้ซ้ำนะจ๊ะ</strong> เพื่อป้องกันอันตรายจากการได้รับยาเกินขนาด (Overdose) จ้ะ ❤️
+        </p>
+      </div>
+
+      <div class="space-y-1 text-left">
+        <p class="text-xs font-semibold text-stone-700">📋 รายการยาที่ทานไปแล้ว:</p>
+        <div id="already-taken-pills-list" class="space-y-1 max-h-36 overflow-y-auto pr-1 text-xs">
+          <!-- Rendered pills -->
+        </div>
+      </div>
+
+      <div class="pt-2 space-y-2">
+        <button onclick="closeAlreadyTakenModal()" class="w-full py-3.5 bg-[#3D7A5A] hover:bg-[#32674B] text-white rounded-xl font-heading text-sm font-medium shadow-md flex items-center justify-center gap-1.5 transition">
+          <span>✓</span>
+          <span>รับทราบแล้ว ไม่ทานซ้ำ</span>
+        </button>
+        <button onclick="resetCurrentSlotIntake()" class="w-full py-2 text-stone-400 hover:text-stone-700 text-xs font-medium underline">
+          ต้องการยกเลิกสถานะเพื่อบันทึกใหม่
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- ========================================== -->
@@ -865,7 +1046,10 @@
   <script>
     // Master Settings & State
     const DEFAULT_SETTINGS = {
-      userName: "คุณตาประเสริฐ",
+      userTitle: "คุณตา",
+      userTitleCustom: "",
+      userName: "ประเสริฐ",
+      userAvatar: "👴🏻",
       caregiverName: "น้องก้อย (ลูกสาว)",
       caregiverPhone: "081-234-5678",
       caregiverLine: "koi_caregiver",
@@ -900,38 +1084,69 @@
     let currentMissedDelayHours = 1;
     let currentMissedHasEaten = true;
 
+    // Helper functions for honorific & full name
+    function getUserTitle() {
+      if (appSettings.userTitle === 'custom' && appSettings.userTitleCustom) {
+        return appSettings.userTitleCustom.trim();
+      }
+      return appSettings.userTitle || "คุณตา";
+    }
+
+    function getUserFullName() {
+      const title = getUserTitle();
+      const name = (appSettings.userName || "").trim();
+      if (!name) return title;
+      if (name.startsWith(title)) return name;
+      return title + name;
+    }
+
+    function getUserAvatar() {
+      return appSettings.userAvatar || "👴🏻";
+    }
+
+    function formatTimeNow() {
+      const d = new Date();
+      const h = String(d.getHours()).padStart(2, '0');
+      const m = String(d.getMinutes()).padStart(2, '0');
+      return h + ":" + m;
+    }
+
     const defaultPillboxState = {
       morning: {
         title: 'ยามื้อเช้า (หลังอาหาร)',
         tag: 'ทานเรียบร้อยแล้วจ้ะ',
         isTaken: true,
+        takenTime: '08:15',
         pills: [
-          { id: 'p_1', name: 'Amlodipine (ยาลดความดัน)', detail: 'ครั้งละ ครึ่งเม็ด (0.5 เม็ด) • หลังอาหาร 15-30 นาที', amount: 'ครึ่งเม็ด (0.5 เม็ด)', mealRelation: 'หลังอาหาร 15-30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานมื้อเช้าพร้อมน้ำอุ่น หลีกเลี่ยงน้ำส้มโอ', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
+          { id: 'p_1', name: 'Amlodipine (ยาลดความดัน)', detail: 'ครั้งละ ครึ่งเม็ด (0.5 เม็ด) • หลังอาหาร 15-30 นาที', amount: 'ครึ่งเม็ด (0.5 เม็ด)', mealRelation: 'หลังอาหาร 15-30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานมื้อเช้าพร้อมน้ำอุ่น หลีกเลี่ยงน้ำส้มโอ', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300', isTaken: true, takenAt: '08:15' }
         ]
       },
       noon: {
         title: 'ยามื้อกลางวัน (หลังอาหาร)',
         tag: 'เตรียมทานพร้อมข้าวเที่ยง',
         isTaken: false,
+        takenTime: null,
         pills: [
-          { id: 'p_2', name: 'Omeprazole (ยาลดกรดในกระเพาะ)', detail: 'ครั้งละ 1 แคปซูล • ก่อนอาหาร 30 นาที (ขณะท้องว่าง)', amount: 'ครั้งละ 1 แคปซูล', mealRelation: 'ก่อนอาหาร 30 นาที (ขณะท้องว่าง)', hospital: 'โรงพยาบาลศิริราช', advice: 'กลืนทั้งเม็ดพร้อมน้ำ ก่อนอาหาร 30 นาที ห้ามทานพร้อมนม', icon: '💊', bg: 'bg-sky-50', border: 'border-sky-200' },
-          { id: 'p_3', name: 'Vitamin B (วิตามินบำรุงปลายประสาท)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร 15-30 นาที', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'หลังอาหาร 15-30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานหลังอาหารกลางวัน', icon: '🟡', bg: 'bg-amber-50', border: 'border-amber-200' }
+          { id: 'p_2', name: 'Omeprazole (ยาลดกรดในกระเพาะ)', detail: 'ครั้งละ 1 แคปซูล • ก่อนอาหาร 30 นาที (ขณะท้องว่าง)', amount: 'ครั้งละ 1 แคปซูล', mealRelation: 'ก่อนอาหาร 30 นาที (ขณะท้องว่าง)', hospital: 'โรงพยาบาลศิริราช', advice: 'กลืนทั้งเม็ดพร้อมน้ำ ก่อนอาหาร 30 นาที ห้ามทานพร้อมนม', icon: '💊', bg: 'bg-sky-50', border: 'border-sky-200', isTaken: false, takenAt: null },
+          { id: 'p_3', name: 'Vitamin B (วิตามินบำรุงปลายประสาท)', detail: 'ครั้งละ 1 เม็ด • หลังอาหาร 15-30 นาที', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'หลังอาหาร 15-30 นาที', hospital: 'โรงพยาบาลศิริราช', advice: 'ทานหลังอาหารกลางวัน', icon: '🟡', bg: 'bg-amber-50', border: 'border-amber-200', isTaken: false, takenAt: null }
         ]
       },
       evening: {
         title: 'ยามื้อเย็น (พร้อมอาหาร)',
         tag: 'รอทานมื้อเย็น 18:00 น.',
         isTaken: false,
+        takenTime: null,
         pills: [
-          { id: 'p_4', name: 'Metformin (ยาควบคุมระดับน้ำตาล)', detail: 'ครั้งละ 1 เม็ด • หลังอาหารทันที / พร้อมอาหารคำแรก', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'หลังอาหารทันที / พร้อมอาหารคำแรก', hospital: 'โรงพยาบาลกรุงเทพ', advice: 'ทานพร้อมข้าวคำแรกเพื่อไม่ให้ระคายเคืองกระเพาะ งดแอลกอฮอล์', icon: '💊', bg: 'bg-emerald-50', border: 'border-emerald-200' }
+          { id: 'p_4', name: 'Metformin (ยาควบคุมระดับน้ำตาล)', detail: 'ครั้งละ 1 เม็ด • หลังอาหารทันที / พร้อมอาหารคำแรก', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'หลังอาหารทันที / พร้อมอาหารคำแรก', hospital: 'โรงพยาบาลกรุงเทพ', advice: 'ทานพร้อมข้าวคำแรกเพื่อไม่ให้ระคายเคืองกระเพาะ งดแอลกอฮอล์', icon: '💊', bg: 'bg-emerald-50', border: 'border-emerald-200', isTaken: false, takenAt: null }
         ]
       },
       bedtime: {
         title: 'ยาก่อนนอน',
         tag: 'ทานก่อนเข้านอน 21:00 น.',
         isTaken: false,
+        takenTime: null,
         pills: [
-          { id: 'p_5', name: 'Atorvastatin (ยาลดไขมันในเลือด)', detail: 'ครั้งละ 1 เม็ด • ก่อนนอน', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'ก่อนนอน', hospital: 'โรงพยาบาลจุฬาลงกรณ์', advice: 'ทานก่อนนอนเป็นประจำเพื่อช่วยดูแลหลอดเลือด', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300' }
+          { id: 'p_5', name: 'Atorvastatin (ยาลดไขมันในเลือด)', detail: 'ครั้งละ 1 เม็ด • ก่อนนอน', amount: 'ครั้งละ 1 เม็ด', mealRelation: 'ก่อนนอน', hospital: 'โรงพยาบาลจุฬาลงกรณ์', advice: 'ทานก่อนนอนเป็นประจำเพื่อช่วยดูแลหลอดเลือด', icon: '⚪', bg: 'bg-stone-100', border: 'border-stone-300', isTaken: false, takenAt: null }
         ]
       }
     };
@@ -961,8 +1176,44 @@
       return defaults[slot] || "12:00";
     }
 
+    function selectUserAvatar(emoji) {
+      document.getElementById('setting-user-avatar').value = emoji;
+      const buttons = document.querySelectorAll('.avatar-btn');
+      buttons.forEach(b => {
+        if (b.innerText.trim() === emoji) {
+          b.classList.add('selected');
+        } else {
+          b.classList.remove('selected');
+        }
+      });
+    }
+
+    function toggleCustomTitleInput() {
+      const select = document.getElementById('setting-user-title');
+      const customInput = document.getElementById('setting-user-title-custom');
+      if (select.value === 'custom') {
+        customInput.classList.remove('hidden');
+      } else {
+        customInput.classList.add('hidden');
+      }
+    }
+
     function applySettingsToUI() {
-      document.getElementById('setting-user-name').value = appSettings.userName;
+      const userTitle = appSettings.userTitle || "คุณตา";
+      const selectTitle = document.getElementById('setting-user-title');
+      if (selectTitle) {
+        if ([...selectTitle.options].some(o => o.value === userTitle)) {
+          selectTitle.value = userTitle;
+        } else {
+          selectTitle.value = 'custom';
+          document.getElementById('setting-user-title-custom').value = userTitle;
+        }
+        toggleCustomTitleInput();
+      }
+
+      document.getElementById('setting-user-name').value = appSettings.userName || "";
+      selectUserAvatar(getUserAvatar());
+
       document.getElementById('setting-caregiver-name').value = appSettings.caregiverName;
       document.getElementById('setting-caregiver-phone').value = appSettings.caregiverPhone;
       document.getElementById('setting-caregiver-line').value = appSettings.caregiverLine;
@@ -985,17 +1236,32 @@
         badgeGemini.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600";
       }
 
-      document.getElementById('landing-greeting-title').innerText = "สวัสดีจ้ะ" + appSettings.userName;
+      // Update Header & Landing Dynamic Titles
+      const userFull = getUserFullName();
+      const userAv = getUserAvatar();
+      const titleOnly = getUserTitle();
+
+      document.getElementById('header-avatar-badge').innerText = userAv;
+      document.getElementById('landing-avatar-icon').innerText = userAv;
+      document.getElementById('landing-greeting-title').innerText = "สวัสดีจ้ะ" + userFull;
+      document.getElementById('pillbox-user-header').innerText = "ตลับยาของ" + userFull;
+      document.getElementById('landing-caregiver-label').innerText = "ลูกหลานผู้ดูแลของ" + titleOnly + ":";
       document.getElementById('landing-caregiver-name').innerText = appSettings.caregiverName;
       document.getElementById('header-caregiver-name').innerText = appSettings.caregiverName;
       document.getElementById('btn-quick-call').href = "tel:" + appSettings.caregiverPhone.replace(/[^0-9]/g, '');
       document.getElementById('landing-phone-btn').href = "tel:" + appSettings.caregiverPhone.replace(/[^0-9]/g, '');
-      document.getElementById('pillbox-user-header').innerText = "ตลับยาของ" + appSettings.userName;
+      document.getElementById('btn-take-label').innerText = titleOnly + "ทานมื้อนี้เรียบร้อยแล้วจ้ะ";
     }
 
     function saveSettings() {
+      const selectedTitle = document.getElementById('setting-user-title').value;
+      const customTitle = document.getElementById('setting-user-title-custom').value.trim();
+
       appSettings = {
+        userTitle: selectedTitle === 'custom' ? (customTitle || 'คุณตา') : selectedTitle,
+        userTitleCustom: customTitle,
         userName: document.getElementById('setting-user-name').value.trim() || DEFAULT_SETTINGS.userName,
+        userAvatar: document.getElementById('setting-user-avatar').value || "👴🏻",
         caregiverName: document.getElementById('setting-caregiver-name').value.trim() || DEFAULT_SETTINGS.caregiverName,
         caregiverPhone: document.getElementById('setting-caregiver-phone').value.trim() || DEFAULT_SETTINGS.caregiverPhone,
         caregiverLine: document.getElementById('setting-caregiver-line').value.trim() || DEFAULT_SETTINGS.caregiverLine,
@@ -1016,8 +1282,112 @@
       } catch (e) {}
 
       applySettingsToUI();
+      renderCurrentSlot();
       alert("บันทึกการตั้งค่าเรียบร้อยแล้วจ้ะ! ข้อมูลจะเชื่อมต่อกับ Google Sheets & Drive ตลอดเวลาจ้ะ ❤️");
       goToView('pillbox');
+    }
+
+    // =========================================================================
+    // 🧪 ทดสอบการเชื่อมต่อ Gemini API (Gemini Connection Test)
+    // =========================================================================
+    async function testGeminiConnection() {
+      const apiKey = document.getElementById('setting-gemini-api-key').value.trim() || appSettings.geminiApiKey;
+      const resultBox = document.getElementById('gemini-test-result-box');
+      const btn = document.getElementById('btn-test-gemini');
+
+      resultBox.classList.remove('hidden');
+
+      if (!apiKey) {
+        resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed bg-amber-50 border-amber-300 text-amber-900";
+        resultBox.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-amber-950">
+            <span>⚠️</span>
+            <span>ยังไม่ได้ระบุ Gemini API Key</span>
+          </div>
+          <p>กรุณาวางรหัส API Key ในช่องด้านบนก่อนกดทดสอบจ้ะ สามารถขอรับฟรีได้ทันทีที่ <a href="https://aistudio.google.com/" target="_blank" class="underline font-bold text-amber-900">aistudio.google.com</a> (ไม่ต้องผูกบัตรเครดิต)</p>
+        `;
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span><span>กำลังทดสอบเชื่อมต่อ...</span>';
+      resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed bg-sky-50 border-sky-300 text-sky-900";
+      resultBox.innerHTML = `
+        <div class="flex items-center gap-2">
+          <div class="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+          <span>กำลังส่งสัญญาณทดสอบไปยัง Google Gemini 1.5 Flash...</span>
+        </div>
+      `;
+
+      const startTime = performance.now();
+
+      try {
+        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "สวัสดี ตอบสั้นๆ ไม่เกิน 10 คำ" }] }],
+            generationConfig: { maxOutputTokens: 30 }
+          })
+        });
+
+        const duration = Math.round(performance.now() - startTime);
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const errMsg = errData.error ? errData.error.message : ("HTTP " + response.status);
+          throw new Error(errMsg);
+        }
+
+        const data = await response.json();
+        const reply = data.candidates && data.candidates[0] && data.candidates[0].content
+          ? data.candidates[0].content.parts[0].text.trim()
+          : "เชื่อมต่อสำเร็จ";
+
+        resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed bg-emerald-50 border-emerald-300 text-emerald-950";
+        resultBox.innerHTML = `
+          <div class="font-bold flex items-center justify-between text-emerald-900">
+            <span class="flex items-center gap-1.5">
+              <span>✅</span>
+              <span>เชื่อมต่อ Gemini API สำเร็จสมบูรณ์แล้วจ้ะ!</span>
+            </span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
+              ความเร็ว: ${duration} ms
+            </span>
+          </div>
+          <p class="text-stone-700"><strong>ข้อความตอบกลับจาก Gemini:</strong> "${reply}"</p>
+          <p class="text-[11px] text-emerald-800 font-medium">✨ ระบบ AI ผู้ช่วยเภสัชกรอัจฉริยะพร้อมวิเคราะห์ยาและให้คำปรึกษาการลืมกินยาแบบเรียลไทม์ 100% แล้วจ้ะ</p>
+        `;
+
+        document.getElementById('badge-gemini-status').innerText = "✨ เปิดใช้งาน Gemini AI แล้ว";
+        document.getElementById('badge-gemini-status').className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
+      } catch (err) {
+        resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-2 leading-relaxed bg-rose-50 border-rose-300 text-rose-950";
+        let solution = "ตรวจสอบว่าคัดลอก API Key มาครบถ้วน ไม่มีช่องว่างเว้นวรรคข้างหน้าหรือข้างหลัง (คีย์มักขึ้นต้นด้วย AIzaSy...)";
+        if (err.message.includes("API_KEY_INVALID")) {
+          solution = "API Key นี้ไม่ถูกต้อง กรุณาเข้า Google AI Studio แล้วสร้าง Key ใหม่อีกครั้งจ้ะ";
+        } else if (err.message.includes("PERMISSION_DENIED")) {
+          solution = "สิทธิ์การใช้งานถูกจำกัด กรุณาตรวจสอบว่าโปรเจกต์ใน Google AI Studio เปิดใช้งาน Generative Language API แล้วหรือยัง";
+        }
+
+        resultBox.innerHTML = `
+          <div class="font-bold flex items-center gap-1.5 text-rose-900">
+            <span>❌</span>
+            <span>ยังไม่สามารถเชื่อมต่อ Gemini API ได้</span>
+          </div>
+          <p class="text-[11px] text-rose-800"><strong>สาเหตุ:</strong> ${err.message}</p>
+          <div class="p-2.5 bg-white/80 rounded-xl border border-rose-200 text-[11px] space-y-1">
+            <p class="font-semibold text-stone-800">💡 วิธีแก้ไขที่แนะนำ:</p>
+            <p class="text-stone-600">1. ${solution}</p>
+            <p class="text-stone-600">2. ไปที่ <a href="https://aistudio.google.com/" target="_blank" class="underline font-bold text-indigo-700">aistudio.google.com</a> เพื่อสร้างคีย์ใหม่ฟรีได้ทันที</p>
+            <p class="text-emerald-800 font-medium pt-1">ไม่ต้องกังวลใจนะจ๊ะ ถึงยังไม่ต่อ API ระบบก็ยังทำงานด้วยสมองกลเภสัชวิทยาในเครื่อง (Offline Master Engine) ได้ครบถ้วน 100% จ้ะ</p>
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🧪</span><span>กดทดสอบการเชื่อมต่อ Gemini API เดี๋ยวนี้</span>';
+      }
     }
 
     // =========================================================================
@@ -1333,7 +1703,7 @@
       try {
         const slotData = pillboxState[currentSlot];
         const pillsDesc = (slotData.pills || []).map(p => "• " + p.name + ": " + (p.detail || '') + " (คำเตือน: " + (p.advice || 'ไม่มี') + ")").join("\n");
-        const prompt = "คุณคือ 'น้องก้อย' ผู้ช่วยดูแลสุขภาพและเภสัชกรใจดีของครอบครัว ให้คำแนะนำแก่ผู้สูงอายุ (คุณตา/คุณยาย) ที่ลืมทานยาหรือทานยาช้ากว่าเวลา\n" +
+        const prompt = "คุณคือ 'น้องก้อย' ผู้ช่วยดูแลสุขภาพและเภสัชกรใจดีของครอบครัว ให้คำแนะนำแก่ผู้สูงอายุ (" + getUserTitle() + ") ที่ลืมทานยาหรือทานยาช้ากว่าเวลา\n" +
           "ข้อมูลการกินยา:\n" +
           "- มื้อยา: " + slotData.title + " (เวลาปกติที่กำหนดไว้: " + getSlotScheduledTime(currentSlot) + " น.)\n" +
           "- รายการยาจริงในมื้อนี้:\n" + pillsDesc + "\n" +
@@ -1387,14 +1757,7 @@
           }).join(". ") + " ข้อสำคัญที่สุด ห้ามทานยาเบิ้ลสองเม็ดเด็ดขาดนะจ๊ะ";
       }
 
-      if ('speechSynthesis' in window) {
-        const utter = new SpeechSynthesisUtterance(textToRead);
-        utter.lang = 'th-TH';
-        utter.rate = 0.9;
-        window.speechSynthesis.speak(utter);
-      } else {
-        alert("🔊 [เสียงอ่านคำแนะนำ]:\n" + textToRead);
-      }
+      speakText(textToRead);
     }
 
     function confirmTakeLateMeal() {
@@ -1460,7 +1823,7 @@
         rawTextEl.value = defaultScanned;
       }
       parsePrescriptionTextToFields(rawTextEl.value);
-      alert("หนูได้นำข้อความมาลงในกล่องและถอดรหัสลงช่องข้อมูลให้เรียบร้อยแล้วจ้ะ คุณตาสามารถตรวจทานและแก้ไขได้เลยนะจ๊ะ");
+      alert("หนูได้นำข้อความมาลงในกล่องและถอดรหัสลงช่องข้อมูลให้เรียบร้อยแล้วจ้ะ ตรวจทานและแก้ไขได้เลยนะจ๊ะ");
     }
 
     function parsePrescriptionTextToFields(rawText) {
@@ -1696,7 +2059,9 @@
           advice: caution || "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด",
           icon: '💊',
           bg: 'bg-emerald-50',
-          border: 'border-emerald-200'
+          border: 'border-emerald-200',
+          isTaken: false,
+          takenAt: null
         });
       });
 
@@ -1705,7 +2070,7 @@
       // บันทึกไป Google Drive & Google Sheet
       syncToGoogleCloud({
         action: "SAVE_PRESCRIPTION",
-        patientName: appSettings.userName,
+        patientName: getUserFullName(),
         drugName: displayName,
         dosage: dosage,
         slot: selectedSlots.join(", "),
@@ -1813,7 +2178,9 @@
           advice: advice,
           icon: foundPill ? foundPill.icon : '💊',
           bg: foundPill ? foundPill.bg : 'bg-emerald-50',
-          border: foundPill ? foundPill.border : 'border-emerald-200'
+          border: foundPill ? foundPill.border : 'border-emerald-200',
+          isTaken: foundPill ? !!foundPill.isTaken : false,
+          takenAt: foundPill ? foundPill.takenAt : null
         });
       });
 
@@ -1855,7 +2222,7 @@
     }
 
     // ==========================================
-    // Pillbox Rendering
+    // Pillbox Rendering & Intake Logic
     // ==========================================
     function selectMealSlot(slot) {
       currentSlot = slot;
@@ -1873,14 +2240,86 @@
       renderCurrentSlot();
     }
 
+    // ฟังก์ชันติ๊กกินยาทีละตัว (Individual Pill Toggle)
+    function togglePillTaken(slot, pillId) {
+      const slotData = pillboxState[slot];
+      if (!slotData) return;
+
+      const pill = slotData.pills.find(p => p.id === pillId);
+      if (!pill) return;
+
+      const willBeTaken = !pill.isTaken;
+      pill.isTaken = willBeTaken;
+
+      if (willBeTaken) {
+        pill.takenAt = formatTimeNow();
+        // ตรวจสอบว่าในมื้อนี้ทานครบทุกตัวหรือยัง
+        const allTaken = slotData.pills.every(p => p.isTaken);
+        if (allTaken) {
+          slotData.isTaken = true;
+          slotData.takenTime = pill.takenAt;
+          slotData.tag = "ทานเรียบร้อยแล้วจ้ะ";
+        } else {
+          slotData.tag = "ทานไปแล้วบางส่วน";
+        }
+
+        savePillboxStateToStorage();
+        renderCurrentSlot();
+
+        // แสดง Popup ยืนยันการทานยานี้
+        showIntakeConfirmPopup({
+          slotTitle: slotData.title,
+          pillsTaken: [pill],
+          takenTime: pill.takenAt,
+          statusText: "ทานรายตัวเรียบร้อย 🟢"
+        });
+
+        // ส่ง Log เข้า Google Sheets
+        syncToGoogleCloud({
+          action: "LOG_TAKEN",
+          patientName: getUserFullName(),
+          mealSlot: slotData.title + " (รายตัว: " + pill.name + ")",
+          pillsSummary: pill.name + " (" + (pill.amount || '1 เม็ด') + ")",
+          scheduledTime: getSlotScheduledTime(slot),
+          status: "ทานรายตัว",
+          delayHours: "0 ชม.",
+          adviceGiven: pill.advice || "ทานตรงเวลา",
+          caregiverName: appSettings.caregiverName
+        });
+      } else {
+        pill.takenAt = null;
+        slotData.isTaken = false;
+        slotData.tag = "รอทาน";
+        savePillboxStateToStorage();
+        renderCurrentSlot();
+      }
+    }
+
     function renderCurrentSlot() {
       const data = pillboxState[currentSlot];
       if (!data) return;
+
+      const userTitle = getUserTitle();
 
       document.getElementById('slot-scheduled-time-label').innerText = "⏰ " + getSlotScheduledTime(currentSlot) + " น.";
       document.getElementById('meal-title').innerText = data.title;
       document.getElementById('meal-status-pill').innerText = data.tag;
       document.getElementById('pills-count-label').innerText = "มื้อนี้มียาตามแพทย์สั่ง (" + data.pills.length + " ชนิด):";
+
+      // อัปเดตแถบมื้อยาด้านบน (Badge)
+      ['morning', 'noon', 'evening', 'bedtime'].forEach(s => {
+        const b = document.getElementById("slot-badge-" + s);
+        const sl = pillboxState[s];
+        if (b && sl) {
+          if (sl.isTaken) {
+            b.innerText = "ทานแล้ว";
+            b.className = "text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold";
+          } else {
+            b.innerText = "รอทาน";
+            b.className = "text-[10px] px-1.5 py-0.5 rounded-md bg-stone-200 text-stone-700";
+          }
+        }
+      });
 
       // สร้างคำแนะนำ AI ที่สอดคล้องกับยาจริง
       const dynamicAdvice = generateSlotAiAdvice(currentSlot);
@@ -1900,27 +2339,37 @@
       } else {
         data.pills.forEach(pill => {
           const item = document.createElement('div');
-          item.className = 'p-3 rounded-2xl bg-[#FCFAF7] border border-[#F2ECE4] flex items-center justify-between gap-2 shadow-sm';
+          const isTaken = !!pill.isTaken;
+          item.className = "p-3 rounded-2xl " + (isTaken ? 'bg-emerald-50/70 border-emerald-300 shadow-sm' : 'bg-[#FCFAF7] border-[#F2ECE4] shadow-sm') + " border flex items-center justify-between gap-2 transition";
           item.innerHTML = `
             <div class="flex items-center gap-2.5 min-w-0 flex-1">
-              <div class="w-10 h-10 rounded-xl ${pill.bg || 'bg-stone-100'} border ${pill.border || 'border-stone-200'} flex items-center justify-center text-xl shrink-0 shadow-inner">
-                ${pill.icon || '💊'}
+              <div class="w-10 h-10 rounded-xl ${isTaken ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (pill.bg || 'bg-stone-100') + ' ' + (pill.border || 'border-stone-200')} border flex items-center justify-center text-xl shrink-0 shadow-inner">
+                ${isTaken ? '✓' : (pill.icon || '💊')}
               </div>
               <div class="min-w-0 flex-1">
-                <p class="font-heading text-sm font-semibold text-stone-800 truncate">${pill.name}</p>
+                <div class="flex items-center gap-1.5">
+                  <p class="font-heading text-sm font-semibold ${isTaken ? 'text-emerald-950 line-through' : 'text-stone-800'} truncate">
+                    ${pill.name}
+                  </p>
+                  ${isTaken ? `<span class="text-[10px] bg-emerald-200/80 text-emerald-900 px-1.5 py-0.2 rounded-full font-bold shrink-0">ทานแล้ว</span>` : ''}
+                </div>
                 <p class="text-xs text-stone-500 truncate">${pill.detail}</p>
                 <div class="flex items-center gap-1.5 pt-0.5">
-                  <span class="text-[10px] text-amber-900 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 truncate max-w-[170px]">
+                  <span class="text-[10px] text-amber-900 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200 truncate max-w-[150px]">
                     🏥 ${pill.hospital || 'รพ.ตามซองยา'}
                   </span>
+                  ${isTaken && pill.takenAt ? `<span class="text-[10px] text-emerald-800 font-medium">🕒 ${pill.takenAt} น.</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="flex items-center gap-1 shrink-0">
-              <button onclick="openEditPillModal('${currentSlot}', '${pill.id}')" title="แก้ไขตามซองยา" class="p-2 rounded-xl text-stone-500 hover:text-amber-800 hover:bg-amber-100 transition text-sm">
+              <button onclick="togglePillTaken('${currentSlot}', '${pill.id}')" title="${isTaken ? 'กดยกเลิกทาน' : 'กดทานยาตัวนี้'}" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm ${isTaken ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-white hover:bg-emerald-50 text-stone-700 border border-stone-300'}">
+                <span>${isTaken ? '✓ ทานแล้ว' : '⚪ ทานยานี้'}</span>
+              </button>
+              <button onclick="openEditPillModal('${currentSlot}', '${pill.id}')" title="แก้ไขตามซองยา" class="p-1.5 rounded-xl text-stone-400 hover:text-amber-800 hover:bg-amber-100 transition text-sm">
                 ✏️
               </button>
-              <button onclick="deletePillFromPillbox('${currentSlot}', '${pill.id}')" title="ลบยา" class="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition text-sm">
+              <button onclick="deletePillFromPillbox('${currentSlot}', '${pill.id}')" title="ลบยา" class="p-1.5 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition text-sm">
                 🗑️
               </button>
             </div>
@@ -1931,31 +2380,58 @@
 
       const btnTake = document.getElementById('btn-take-pill');
       const labelTake = document.getElementById('btn-take-label');
+
       if (data.isTaken) {
-        btnTake.className = "w-full py-4 rounded-2xl bg-stone-200 text-stone-600 font-heading font-medium text-base flex items-center justify-center gap-2";
-        labelTake.innerText = "ทานมื้อนี้เรียบร้อยแล้วจ้ะ (กดเพื่อทานอีกครั้ง)";
+        btnTake.className = "w-full py-4 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-900 font-heading font-medium text-base flex items-center justify-center gap-2 shadow-sm cursor-pointer hover:bg-emerald-200 transition";
+        labelTake.innerText = `✓ ${userTitle}ทานมื้อนี้เรียบร้อยแล้วจ้ะ (กดดูข้อมูล)`;
       } else {
         btnTake.className = "w-full py-4 rounded-2xl bg-[#3D7A5A] hover:bg-[#32674B] active:scale-[0.98] text-white font-heading font-medium text-lg shadow-md pill-button-glow flex items-center justify-center gap-2 transition duration-200";
-        labelTake.innerText = "คุณตาทานมื้อนี้เรียบร้อยแล้วจ้ะ";
+        labelTake.innerText = `${userTitle}ทานทั้งมื้อนี้เรียบร้อยแล้วจ้ะ`;
       }
     }
 
+    // ทานยาทั้งมื้อ
     function takeCurrentMeal(isLate, delayHours) {
       if (!isLate) isLate = false;
       if (!delayHours) delayHours = 0;
 
       const data = pillboxState[currentSlot];
+      if (!data) return;
+
+      // ถ้าทานไปแล้วทั้งมื้อ ให้เด้ง Popup แจ้งเตือนว่าทานแล้ว (ป้องกันกินซ้ำ)
+      if (data.isTaken) {
+        showAlreadyTakenModal();
+        return;
+      }
+
+      const nowTime = formatTimeNow();
       data.isTaken = true;
+      data.takenTime = nowTime;
       data.tag = isLate ? "ทานช้ากว่าเวลา (~" + delayHours + " ชม.)" : 'ทานเรียบร้อยแล้วจ้ะ';
+
+      // ทำเครื่องหมายทุกเม็ดว่าทานแล้ว
+      data.pills.forEach(p => {
+        p.isTaken = true;
+        p.takenAt = nowTime;
+      });
+
       savePillboxStateToStorage();
       renderCurrentSlot();
 
       const scheduledTime = getSlotScheduledTime(currentSlot);
       const delayStatus = isLate ? "กินช้ากว่าเวลา (" + delayHours + " ชม.)" : "ตรงเวลาปกติ";
 
+      // แสดง Popup ยืนยันการทานยาอย่างอบอุ่น
+      showIntakeConfirmPopup({
+        slotTitle: data.title,
+        pillsTaken: data.pills,
+        takenTime: nowTime,
+        statusText: delayStatus
+      });
+
       syncToGoogleCloud({
         action: "LOG_TAKEN",
-        patientName: appSettings.userName,
+        patientName: getUserFullName(),
         mealSlot: data.title,
         pillsSummary: data.pills.map(p => p.name).join(", "),
         scheduledTime: scheduledTime,
@@ -1964,18 +2440,102 @@
         adviceGiven: document.getElementById('meal-advice').innerText,
         caregiverName: appSettings.caregiverName
       });
+    }
 
-      alert("ชื่นใจจังเลยจ้ะคุณตา! หนูบันทึกไว้ในตลับยา และจดเวลาทานลงใน Google Sheets ให้ลูกหลานดูแล้วนะจ๊ะ ❤️");
+    // แสดง Popup ยืนยันการกินยา
+    function showIntakeConfirmPopup({ slotTitle, pillsTaken, takenTime, statusText }) {
+      const userTitle = getUserTitle();
+      document.getElementById('confirm-popup-subtitle').innerText = "มื้อ" + slotTitle + " • " + userTitle + "ดูแลตัวเองยอดเยี่ยมมากจ้ะ";
+      document.getElementById('confirm-popup-time').innerText = "🕒 เวลา " + takenTime + " น.";
+      document.getElementById('confirm-popup-status').innerText = statusText;
+
+      const listEl = document.getElementById('confirm-popup-pills-list');
+      listEl.innerHTML = '';
+      pillsTaken.forEach(p => {
+        const row = document.createElement('div');
+        row.className = "p-2 rounded-xl bg-white border border-emerald-100 flex items-center justify-between";
+        row.innerHTML = `
+          <span class="font-bold text-stone-800">💊 ${p.name}</span>
+          <span class="text-stone-500 font-medium">${p.amount || '1 เม็ด'}</span>
+        `;
+        listEl.appendChild(row);
+      });
+
+      const msg = "ชื่นใจจังเลยจ้ะ" + userTitle + "! ร่างกายสดชื่น สุขภาพแข็งแรง หนูบันทึกลงตลับยาและจดเวลาทานเข้า Google Sheet เรียบร้อยแล้วนะจ๊ะ ❤️";
+      document.getElementById('confirm-popup-encouragement').innerText = msg;
+
+      document.getElementById('modal-intake-confirm').classList.remove('hidden');
+
+      // อ่านเสียงภาษาไทยอัตโนมัติ
+      speakText(userTitle + "ทานยาเรียบร้อยแล้วจ้ะ ชื่นใจจังเลย");
+    }
+
+    function closeIntakeConfirmModal() {
+      document.getElementById('modal-intake-confirm').classList.add('hidden');
+    }
+
+    function speakConfirmPopup() {
+      const title = getUserTitle();
+      const time = document.getElementById('confirm-popup-time').innerText;
+      const text = title + "ทานยาเรียบร้อยแล้วจ้ะ " + time + ". ร่างกายสดชื่นแข็งแรงนะจ๊ะ";
+      speakText(text);
+    }
+
+    // แสดง Popup แจ้งเตือนเมื่อมื้อนี้ทานแล้ว (ป้องกันกินยาซ้ำ)
+    function showAlreadyTakenModal() {
+      const data = pillboxState[currentSlot];
+      const userTitle = getUserTitle();
+
+      document.getElementById('already-taken-title').innerText = "มื้อนี้" + userTitle + "ทานเรียบร้อยแล้วจ้ะ!";
+      document.getElementById('already-taken-subtitle').innerText = "บันทึกเวลาไว้เมื่อ " + (data.takenTime || 'ก่อนหน้านี้') + " น. แล้วนะจ๊ะ";
+
+      const listEl = document.getElementById('already-taken-pills-list');
+      listEl.innerHTML = '';
+      data.pills.forEach(p => {
+        const row = document.createElement('div');
+        row.className = "p-2 rounded-xl bg-white border border-amber-100 flex items-center justify-between text-xs";
+        row.innerHTML = `
+          <span class="font-bold text-stone-800">✓ ${p.name}</span>
+          <span class="text-stone-500">${p.takenAt ? p.takenAt + ' น.' : 'ทานแล้ว'}</span>
+        `;
+        listEl.appendChild(row);
+      });
+
+      document.getElementById('modal-already-taken').classList.remove('hidden');
+      speakText("มื้อนี้" + userTitle + "ทานยาเรียบร้อยแล้วจ้ะ ไม่ต้องทานซ้ำนะจ๊ะ");
+    }
+
+    function closeAlreadyTakenModal() {
+      document.getElementById('modal-already-taken').classList.add('hidden');
+    }
+
+    function resetCurrentSlotIntake() {
+      if (!confirm("คุณตาต้องการยกเลิกสถานะการทานของมื้อนี้เพื่อเริ่มบันทึกใหม่ใช่ไหมจ๊ะ?")) {
+        return;
+      }
+      const data = pillboxState[currentSlot];
+      data.isTaken = false;
+      data.takenTime = null;
+      data.tag = "รอทาน";
+      data.pills.forEach(p => {
+        p.isTaken = false;
+        p.takenAt = null;
+      });
+      savePillboxStateToStorage();
+      renderCurrentSlot();
+      closeAlreadyTakenModal();
+      alert("ยกเลิกสถานะเรียบร้อยแล้วจ้ะ สามารถกดทานยาใหม่ได้เลยนะจ๊ะ");
     }
 
     function logMissedDoseToSheet() {
-      if (!confirm("ต้องการจดบันทึกว่า 'ลืมทาน" + pillboxState[currentSlot].title + "' ลง Google Sheets ใช่ไหมจ๊ะ?")) {
+      const userTitle = getUserTitle();
+      if (!confirm("ต้องการจดบันทึกว่า '" + userTitle + "ลืมทาน" + pillboxState[currentSlot].title + "' ลง Google Sheets ใช่ไหมจ๊ะ?")) {
         return;
       }
 
       syncToGoogleCloud({
         action: "LOG_MISSED",
-        patientName: appSettings.userName,
+        patientName: getUserFullName(),
         mealSlot: pillboxState[currentSlot].title,
         pillsSummary: pillboxState[currentSlot].pills.map(p => p.name).join(", "),
         scheduledTime: getSlotScheduledTime(currentSlot),
@@ -1988,16 +2548,19 @@
       alert("บันทึกเหตุการณ์ลืมทานยาลงใน Google Sheets เรียบร้อยแล้วจ้ะ เพื่อเป็นข้อมูลให้คุณหมอและลูกหลานทราบนะจ๊ะ");
     }
 
-    function speakAdvice() {
-      const text = document.getElementById('meal-advice').innerText;
+    function speakText(text) {
       if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
         utter.lang = 'th-TH';
         utter.rate = 0.9;
         window.speechSynthesis.speak(utter);
-      } else {
-        alert('🔊 [เสียงอ่านคำแนะนำ]:\n"' + text + '"');
       }
+    }
+
+    function speakAdvice() {
+      const text = document.getElementById('meal-advice').innerText;
+      speakText(text);
     }
 
     // Google Sheets Sync
@@ -2030,7 +2593,7 @@
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: JSON.stringify({
             action: "LOG_TAKEN",
-            patientName: appSettings.userName,
+            patientName: getUserFullName(),
             mealSlot: "ทดสอบระบบ",
             pillsSummary: "ยาตัวอย่างทดสอบการเชื่อมต่อ",
             scheduledTime: "12:00",
@@ -2077,7 +2640,9 @@
                   advice: m.advice || 'รับประทานตามที่แพทย์สั่ง',
                   icon: m.pillColorShape || '💊',
                   bg: 'bg-stone-100',
-                  border: 'border-stone-300'
+                  border: 'border-stone-300',
+                  isTaken: false,
+                  takenAt: null
                 });
               }
             });
