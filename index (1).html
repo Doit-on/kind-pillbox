@@ -348,23 +348,19 @@
           </div>
           <textarea id="raw-prescription-text" rows="3" placeholder="ข้อความจากซองยาที่ระบบอ่านได้จะปรากฏตรงนี้ คุณตาสามารถพิมพ์แก้ไขหรือวางข้อความที่นี่เพื่อแปลผลใหม่ได้จ้ะ" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs bg-white text-stone-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none" oninput="parsePrescriptionTextToFields(this.value)"></textarea>
           
-          <!-- ตัวอย่างซองยาโรงพยาบาลจริงสำหรับทดสอบทันที -->
-          <div class="flex items-center justify-between text-[11px] text-stone-500 pt-1">
-            <span class="font-medium">หรือคลิกทดสอบตัวอย่างซองยาจริง:</span>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-            <button onclick="applySamplePreset(1)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
-              🏥 รพ.ศิริราช: Amlodipine 5mg
-            </button>
-            <button onclick="applySamplePreset(2)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
-              🏥 รพ.จุฬา: Metformin (เช้า-เย็น)
-            </button>
-            <button onclick="applySamplePreset(3)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
-              🌙 รพ.รามา: Atorvastatin 20mg
-            </button>
-            <button onclick="applySamplePreset(4)" class="p-2 bg-white border border-stone-200 rounded-lg text-left hover:bg-amber-50 transition truncate">
-              💊 ยาฆ่าเชื้อ: Amoxicillin 3 มื้อ
-            </button>
+          <!-- โรงพยาบาลประจำที่คุณติดดาวไว้ (Favorite Hospitals) -->
+          <div class="pt-2 border-t border-stone-200/80 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-stone-700 flex items-center gap-1.5">
+                <span>⭐</span>
+                <span>โรงพยาบาลประจำที่คุณติดดาวไว้ (Favorite):</span>
+              </span>
+              <span id="fav-hospital-count" class="text-[10px] text-amber-900 font-bold bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">3 แห่ง</span>
+            </div>
+            <p class="text-[11px] text-stone-500">แตะชื่อโรงพยาบาลประจำ เพื่อระบุลงในข้อมูลซองยาได้ทันที:</p>
+            <div id="favorite-hospitals-chips" class="flex flex-wrap gap-1.5 min-h-[32px]">
+              <!-- ชิปโรงพยาบาล Favorite แสดงผลอัตโนมัติ -->
+            </div>
           </div>
         </div>
 
@@ -466,9 +462,20 @@
             </div>
 
             <!-- 5. โรงพยาบาล และคำแนะนำพิเศษ -->
-            <div>
-              <label class="font-semibold text-stone-700">6. โรงพยาบาล/คลินิกที่จ่ายยา:</label>
-              <input type="text" id="verify-hospital-name" placeholder="เช่น โรงพยาบาลศิริราช" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white mt-1">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="font-semibold text-stone-700">6. โรงพยาบาล/คลินิกที่จ่ายยา:</label>
+                <button type="button" id="btn-toggle-favorite-hospital" onclick="toggleCurrentHospitalFavorite()" class="text-[11px] px-2.5 py-1 rounded-lg border font-medium transition flex items-center gap-1.5 bg-stone-100 border-stone-200 text-stone-700 hover:bg-amber-50">
+                  <span id="fav-star-icon">☆</span>
+                  <span id="fav-star-label">ติดดาวเป็น รพ.ประจำ</span>
+                </button>
+              </div>
+              <select id="select-hospital-dropdown" onchange="handleHospitalDropdownChange(this.value)" class="w-full p-2.5 rounded-xl border border-stone-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-white text-stone-800 font-medium">
+                <!-- Dropdown populated by initHospitalDropdown() -->
+              </select>
+              <div id="custom-hospital-wrapper" class="hidden">
+                <input type="text" id="verify-hospital-name" placeholder="พิมพ์ระบุชื่อโรงพยาบาล/คลินิก เช่น โรงพยาบาลศิริราช" class="w-full p-2.5 rounded-xl border border-amber-300 text-xs focus:ring-2 focus:ring-emerald-500 bg-amber-50/40 text-stone-800" oninput="onHospitalNameInput(this.value)">
+              </div>
             </div>
 
             <div>
@@ -564,6 +571,29 @@
               <button type="button" onclick="selectUserAvatar('💖')" class="avatar-btn p-2 rounded-xl border border-stone-200 bg-white text-2xl flex items-center justify-center transition">💖</button>
             </div>
             <input type="hidden" id="setting-user-avatar" value="👴🏻">
+          </div>
+
+          <!-- โรงพยาบาลประจำ (Favorite Hospitals Manager) -->
+          <div class="space-y-2 pt-3 border-t border-stone-200/80">
+            <div class="flex items-center justify-between">
+              <label class="text-xs text-stone-700 font-semibold flex items-center gap-1.5">
+                <span>⭐</span>
+                <span>โรงพยาบาลประจำ (Favorite Hospitals):</span>
+              </label>
+              <span id="settings-fav-hosp-count" class="text-[10px] text-amber-900 font-bold bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200">3 แห่ง</span>
+            </div>
+            <p class="text-[11px] text-stone-500">เลือกเพิ่มหรือลบโรงพยาบาลที่ไปรับยาเป็นประจำ เพื่อให้มีปุ่มลัดแตะเลือกได้ทันทีในหน้าสแกนยาจ้ะ:</p>
+            <div id="settings-fav-hospitals-list" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- รายการโรงพยาบาลประจำพร้อมปุ่มลบ (×) -->
+            </div>
+            <div class="flex gap-1.5 pt-1">
+              <select id="settings-add-hospital-select" class="flex-1 p-2.5 rounded-xl border border-stone-300 text-xs bg-white text-stone-800">
+                <!-- ตัวเลือกโรงพยาบาลทั้งหมด -->
+              </select>
+              <button type="button" onclick="addFavoriteHospitalFromSettings()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-sm">
+                <span>+ ติดดาว</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1056,6 +1086,11 @@
       caregiverEmail: "koi.family@gmail.com",
       showLandingFirst: true,
       geminiApiKey: "",
+      favoriteHospitals: [
+        "โรงพยาบาลศิริราช",
+        "โรงพยาบาลรามาธิบดี",
+        "โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย"
+      ],
       slotScheduleHours: {
         morning: "08:00",
         noon: "12:30",
@@ -1064,6 +1099,104 @@
       },
       gasUrl: "https://script.google.com/macros/s/AKfycbwPyqwxAigDQQYFVfmLy1IHs4GWJTzKsp95qfVPOAtlWS4EoUNe5f7d-6S4jGr64xZY/exec"
     };
+
+    // =========================================================================
+    // 🏥 ฐานข้อมูลโรงพยาบาลสำคัญในประเทศไทย (Thailand Major Hospitals Master List)
+    // =========================================================================
+    const THAILAND_HOSPITALS = [
+      // 1. โรงเรียนแพทย์ & มหาวิทยาลัย
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลศิริราช" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลรามาธิบดี" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลพระมงกุฎเกล้า" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลวชิรพยาบาล" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลมหาราชนครเชียงใหม่ (สวนดอก)" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลศรีนครินทร์ (ขอนแก่น)" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลสงขลานครินทร์ (หาดใหญ่)" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลมหาวิทยาลัยนเรศวร (พิษณุโลก)" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลมหาวิทยาลัยบูรพา (ชลบุรี)" },
+      { category: "โรงเรียนแพทย์ / มหาวิทยาลัย", name: "โรงพยาบาลมหาวิทยาลัยเทคโนโลยีสุรนารี" },
+
+      // 2. โรงพยาบาลรัฐบาล / ส่วนกลาง
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลราชวิถี" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลตำรวจ" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลเลิดสิน" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลนพรัตนราชธานี" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลสมเด็จพระปิ่นเกล้า (ทหารเรือ)" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลภูมิพลอดุลยเดช (ทหารอากาศ)" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลสงฆ์" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "สถาบันประสาทวิทยา" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "สถาบันมะเร็งแห่งชาติ" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "สถาบันโรคทรวงอก" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลกลาง (กทม.)" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลตากสิน (กทม.)" },
+      { category: "โรงพยาบาลรัฐบาล / ส่วนกลาง", name: "โรงพยาบาลเจริญกรุงประชารักษ์ (กทม.)" },
+
+      // 3. โรงพยาบาลศูนย์และประจำจังหวัด
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลชลบุรี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสรรพสิทธิประสงค์ (อุบลราชธานี)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลขอนแก่น" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลมหาราชนครราชสีมา" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลอุดรธานี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสุราษฎร์ธานี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลหาดใหญ่ (สงขลา)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลวชิระภูเก็ต" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลนครพิงค์ (เชียงใหม่)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลเชียงรายประชานุเคราะห์" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลลำปาง" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลพุทธชินราช (พิษณุโลก)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสวรรค์ประชารักษ์ (นครสวรรค์)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลศูนย์เจ้าพระยายมราช (สุพรรณบุรี)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลราชบุรี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสระบุรี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลพระนครศรีอยุธยา" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลระยอง" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลพระปกเกล้า (จันทบุรี)" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสมเด็จพระบรมราชเทวี ณ ศรีราชา" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลร้อยเอ็ด" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลบุรีรัมย์" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสุรินทร์" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลสกลนคร" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลมหาราชนครศรีธรรมราช" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลตรัง" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลยะลา" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลปัตตานี" },
+      { category: "โรงพยาบาลศูนย์ / ประจำจังหวัด", name: "โรงพยาบาลนราธิวาสราชนครินทร์" },
+
+      // 4. โรงพยาบาลเอกชนชั้นนำ
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลกรุงเทพ" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลบำรุงราษฎร์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลสมิติเวช สุขุมวิท" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลสมิติเวช ศรีนครินทร์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลพญาไท 1" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลพญาไท 2" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลพญาไท 3" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลพญาไท นวมินทร์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเปาโล พหลโยธิน" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเปาโล เกษตร" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเปาโล โชคชัย 4" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเกษมราษฎร์ ประชาชื่น" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเกษมราษฎร์ บางแค" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเกษมราษฎร์ รัตนาธิเบศร์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลธนบุรี 1" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลธนบุรี 2" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลวิภาวดี" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลพระรามเก้า" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลปิยะเวท" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเซนต์หลุยส์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลหัวเฉียว" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลเวชธานี" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลนนทเวช" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลสินแพทย์ รามอินทรา" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลรามคำแหง" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลวิชัยยุทธ" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลบางปะกอก 9 อินเตอร์เนชั่นแนล" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลสุขุมวิท" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลไทยนครินทร์" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลกรุงเทพคริสเตียน" },
+      { category: "โรงพยาบาลเอกชน", name: "โรงพยาบาลมิชชั่น" }
+    ];
 
     function loadSettings() {
       try {
@@ -1236,6 +1369,11 @@
         badgeGemini.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600";
       }
 
+      // Initialize Hospital Dropdowns and Favorites
+      initHospitalDropdown();
+      renderFavoriteHospitalChips();
+      renderSettingsFavoriteHospitals();
+
       // Update Header & Landing Dynamic Titles
       const userFull = getUserFullName();
       const userAv = getUserAvatar();
@@ -1268,6 +1406,9 @@
         caregiverEmail: document.getElementById('setting-caregiver-email').value.trim() || DEFAULT_SETTINGS.caregiverEmail,
         gasUrl: document.getElementById('setting-gas-url').value.trim() || DEFAULT_SETTINGS.gasUrl,
         geminiApiKey: document.getElementById('setting-gemini-api-key').value.trim(),
+        favoriteHospitals: (appSettings.favoriteHospitals && appSettings.favoriteHospitals.length > 0)
+          ? appSettings.favoriteHospitals
+          : DEFAULT_SETTINGS.favoriteHospitals,
         slotScheduleHours: {
           morning: document.getElementById('setting-time-morning').value || "08:00",
           noon: document.getElementById('setting-time-noon').value || "12:30",
@@ -1288,10 +1429,61 @@
     }
 
     // =========================================================================
+    // 🧠 ระบบเรียกใช้งาน Google Gemini API (Universal Multi-Model Engine)
+    // รองรับทั้งคีย์รุ่นใหม่ล่าสุด (AQ.) และคีย์รุ่นเดิม (AIza)
+    // =========================================================================
+    async function callGeminiApi(apiKey, contents, options = {}) {
+      if (!apiKey || !apiKey.trim()) throw new Error("ไม่พบรหัส API Key");
+      const cleanKey = apiKey.trim();
+      const models = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+      let lastError = null;
+
+      for (const model of models) {
+        try {
+          const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + cleanKey;
+          const payload = {
+            contents: contents,
+            generationConfig: options.generationConfig || {}
+          };
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": cleanKey
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.status === 404) {
+            // โมเดลนี้ไม่รองรับกับประเภทคีย์หรือถูกแทนที่ ให้ลองโมเดลถัดไป
+            lastError = new Error("Model " + model + " not found (404)");
+            continue;
+          }
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            const errMsg = errData.error ? errData.error.message : ("HTTP " + response.status);
+            throw new Error(errMsg);
+          }
+
+          const data = await response.json();
+          return { data, model };
+        } catch (e) {
+          lastError = e;
+          if (!e.message.includes("404")) {
+            throw e;
+          }
+        }
+      }
+      throw lastError || new Error("ไม่พบโมเดล Gemini ที่สามารถใช้งานได้กับ API Key นี้");
+    }
+
+    // =========================================================================
     // 🧪 ทดสอบการเชื่อมต่อ Gemini API (Gemini Connection Test)
     // =========================================================================
     async function testGeminiConnection() {
-      const apiKey = document.getElementById('setting-gemini-api-key').value.trim() || appSettings.geminiApiKey;
+      const inputEl = document.getElementById('setting-gemini-api-key');
+      const apiKey = (inputEl ? inputEl.value.trim() : '') || (appSettings.geminiApiKey ? appSettings.geminiApiKey.trim() : '');
       const resultBox = document.getElementById('gemini-test-result-box');
       const btn = document.getElementById('btn-test-gemini');
 
@@ -1309,38 +1501,32 @@
         return;
       }
 
+      // บันทึกคีย์ลง local storage อัตโนมัติเพื่อให้พร้อมใช้งานทันที
+      appSettings.geminiApiKey = apiKey;
+      try {
+        localStorage.setItem("kind_pillbox_settings", JSON.stringify(appSettings));
+      } catch (e) {}
+
       btn.disabled = true;
-      btn.innerHTML = '<span>⏳</span><span>กำลังทดสอบเชื่อมต่อ...</span>';
+      btn.innerHTML = '<span>⏳</span><span>กำลังทดสอบเชื่อมต่อ Google Gemini...</span>';
       resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed bg-sky-50 border-sky-300 text-sky-900";
       resultBox.innerHTML = `
         <div class="flex items-center gap-2">
           <div class="w-4 h-4 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
-          <span>กำลังส่งสัญญาณทดสอบไปยัง Google Gemini 1.5 Flash...</span>
+          <span>กำลังส่งสัญญาณทดสอบไปยัง Google Gemini (โมเดล 3.5 Flash / Flash Latest)...</span>
         </div>
       `;
 
       const startTime = performance.now();
 
       try {
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "สวัสดี ตอบสั้นๆ ไม่เกิน 10 คำ" }] }],
-            generationConfig: { maxOutputTokens: 30 }
-          })
+        const { data, model } = await callGeminiApi(apiKey, [
+          { parts: [{ text: "สวัสดี ตอบสั้นๆ ไม่เกิน 10 คำ" }] }
+        ], {
+          generationConfig: { maxOutputTokens: 30 }
         });
 
         const duration = Math.round(performance.now() - startTime);
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error ? errData.error.message : ("HTTP " + response.status);
-          throw new Error(errMsg);
-        }
-
-        const data = await response.json();
         const reply = data.candidates && data.candidates[0] && data.candidates[0].content
           ? data.candidates[0].content.parts[0].text.trim()
           : "เชื่อมต่อสำเร็จ";
@@ -1353,18 +1539,21 @@
               <span>เชื่อมต่อ Gemini API สำเร็จสมบูรณ์แล้วจ้ะ!</span>
             </span>
             <span class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-bold">
-              ความเร็ว: ${duration} ms
+              ${model} (${duration} ms)
             </span>
           </div>
           <p class="text-stone-700"><strong>ข้อความตอบกลับจาก Gemini:</strong> "${reply}"</p>
           <p class="text-[11px] text-emerald-800 font-medium">✨ ระบบ AI ผู้ช่วยเภสัชกรอัจฉริยะพร้อมวิเคราะห์ยาและให้คำปรึกษาการลืมกินยาแบบเรียลไทม์ 100% แล้วจ้ะ</p>
         `;
 
-        document.getElementById('badge-gemini-status').innerText = "✨ เปิดใช้งาน Gemini AI แล้ว";
-        document.getElementById('badge-gemini-status').className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
+        const badge = document.getElementById('badge-gemini-status');
+        if (badge) {
+          badge.innerText = "✨ เปิดใช้งาน " + model + " แล้ว";
+          badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800";
+        }
       } catch (err) {
         resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-2 leading-relaxed bg-rose-50 border-rose-300 text-rose-950";
-        let solution = "ตรวจสอบว่าคัดลอก API Key มาครบถ้วน ไม่มีช่องว่างเว้นวรรคข้างหน้าหรือข้างหลัง (คีย์มักขึ้นต้นด้วย AIzaSy...)";
+        let solution = "ตรวจสอบว่าคัดลอก API Key มาครบถ้วน ไม่มีช่องว่างเว้นวรรคข้างหน้าหรือข้างหลัง (คีย์รุ่นใหม่มักขึ้นต้นด้วย AQ. หรือ AIzaSy...)";
         if (err.message.includes("API_KEY_INVALID")) {
           solution = "API Key นี้ไม่ถูกต้อง กรุณาเข้า Google AI Studio แล้วสร้าง Key ใหม่อีกครั้งจ้ะ";
         } else if (err.message.includes("PERMISSION_DENIED")) {
@@ -1715,22 +1904,13 @@
           "3. ย้ำเตือนกฎความปลอดภัยที่ห้ามลืมเด็ดขาด คือ 'ห้ามเพิ่มขนาดยาเป็น 2 เท่าเพื่อชดเชยมื้อที่ลืมเด็ดขาด'\n" +
           "เขียนตอบสั้นกระชับเข้าใจง่ายประมาณ 3-5 บรรทัด";
 
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.2, maxOutputTokens: 600 }
-          })
+        const { data } = await callGeminiApi(apiKey, [
+          { parts: [{ text: prompt }] }
+        ], {
+          generationConfig: { temperature: 0.2, maxOutputTokens: 600 }
         });
 
-        if (!response.ok) {
-          throw new Error("Gemini API HTTP Error " + response.status);
-        }
-
-        const data = await response.json();
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
           textEl.innerText = data.candidates[0].content.parts[0].text;
         } else {
           throw new Error("ไม่มีข้อความตอบกลับจากโมเดล");
@@ -1773,6 +1953,9 @@
     // =========================================================================
     // 🧠 ระบบ OCR อ่านข้อความจากรูปภาพจริง + แปลงลงช่องข้อมูล (PARSER)
     // =========================================================================
+    // =========================================================================
+    // 🧠 ระบบ AI สแกนและถอดรหัสฉลากยา (Gemini Vision + Tesseract Fallback)
+    // =========================================================================
     async function performOcrOnImage(imageSrc) {
       const loader = document.getElementById('ocr-loading-overlay');
       const progressText = document.getElementById('ocr-progress-text');
@@ -1781,9 +1964,77 @@
       loader.classList.remove('hidden');
       progressText.innerText = "หนูกำลังเชื่อมต่อสายตาอ่านตัวหนังสือ...";
 
+      const apiKey = appSettings.geminiApiKey ? appSettings.geminiApiKey.trim() : "";
+
+      // 🌟 ขั้นที่ 1: หากมีการตั้งค่า Gemini API ให้ใช้ Gemini 3.5 Vision สแกนถอดรหัสระดับสูง
+      if (apiKey) {
+        try {
+          progressText.innerText = "✨ กำลังส่งภาพให้ Gemini 3.5 AI อ่านซองยาอย่างแม่นยำ...";
+          
+          let base64Data = imageSrc;
+          let mimeType = "image/jpeg";
+          if (imageSrc.includes(",")) {
+            const parts = imageSrc.split(",");
+            base64Data = parts[1];
+            const mimeMatch = parts[0].match(/:(.*?);/);
+            if (mimeMatch) mimeType = mimeMatch[1];
+          }
+
+          const prompt = `คุณคือผู้ช่วยเภสัชกรอัจฉริยะ กรุณาอ่านและถอดรหัสข้อความจากซองยานี้อย่างละเอียดและแม่นยำ
+สกัดข้อมูลแล้วตอบกลับเป็น JSON เท่านั้น โดยมีโครงสร้างดังนี้:
+{
+  "rawText": "ข้อความทั้งหมดที่อ่านได้จากฉลากยา",
+  "hospital": "ชื่อโรงพยาบาลหรือคลินิก (เช่น โรงพยาบาลศิริราช)",
+  "drugName": "ชื่อยาและขนาด (เช่น Amlodipine 5mg หรือ ยาลดความดัน)",
+  "dosage": "ขนาดยา เช่น 5 mg",
+  "amount": "จำนวนที่ทาน เช่น ครั้งละ ครึ่งเม็ด หรือ ครั้งละ 1 เม็ด",
+  "slots": ["morning"], // มื้อยาที่ระบุบนซองยา: เลือกใส่ได้หลายตัวจาก ["morning", "noon", "evening", "bedtime"]
+  "timing": "after_immediate", // "after_immediate" (หลังอาหารทันที), "after_30" (หลังอาหาร 15-30 นาที), "before" (ก่อนอาหาร), "bedtime" (ก่อนนอน), "prn" (เมื่อมีอาการ)
+  "warning": "คำเตือนหรือข้อควรระวังพิเศษตามซองยา"
+}`;
+
+          const { data } = await callGeminiApi(apiKey, [
+            {
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: mimeType, data: base64Data } }
+              ]
+            }
+          ], {
+            generationConfig: {
+              temperature: 0.1,
+              responseMimeType: "application/json"
+            }
+          });
+
+          if (data && data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const jsonText = data.candidates[0].content.parts[0].text.trim();
+            let parsed = null;
+            try {
+              parsed = JSON.parse(jsonText);
+            } catch (je) {
+              const matched = jsonText.match(/\{[\s\S]*\}/);
+              if (matched) parsed = JSON.parse(matched[0]);
+            }
+
+            if (parsed) {
+              if (parsed.rawText) rawTextEl.value = parsed.rawText;
+              applyGeminiParsedPrescription(parsed);
+              document.getElementById('ocr-status-tag').innerText = "✨ Gemini 3.5 AI วิเคราะห์แม่นยำ";
+              alert("✨ สแกนด้วย Gemini AI สำเร็จแล้วจ้ะ! ข้อมูลซองยาถูกถอดรหัสลงช่องอย่างแม่นยำแล้ว ตรวจทานได้เลยนะจ๊ะ");
+              loader.classList.add('hidden');
+              return;
+            }
+          }
+        } catch (geminiVisionErr) {
+          console.warn("Gemini vision error, falling back to local Tesseract:", geminiVisionErr);
+        }
+      }
+
+      // 🌿 ขั้นที่ 2: ระบบสำรองในเครื่อง (Tesseract OCR) สำหรับกรณีไม่มี API หรือเน็ตไม่เสถียร
       try {
         if (typeof Tesseract !== 'undefined') {
-          progressText.innerText = "กำลังสแกนตัวหนังสือภาษาไทยและอังกฤษ...";
+          progressText.innerText = "กำลังสแกนตัวหนังสือด้วยสมองกลในเครื่อง...";
           const result = await Tesseract.recognize(
             imageSrc,
             'eng+tha',
@@ -1814,6 +2065,68 @@
       } finally {
         loader.classList.add('hidden');
       }
+    }
+
+    function applyGeminiParsedPrescription(parsed) {
+      if (!parsed) return;
+
+      if (parsed.drugName) {
+        document.getElementById('verify-drug-name').value = parsed.drugName;
+        document.getElementById('badge-match-name').innerText = "✓ Gemini ตรวจพบ";
+      }
+
+      if (parsed.dosage) {
+        document.getElementById('verify-drug-dosage').value = parsed.dosage;
+        document.getElementById('badge-match-dosage').innerText = "✓ " + parsed.dosage;
+      }
+
+      if (parsed.amount) {
+        document.getElementById('verify-drug-amount').value = parsed.amount;
+        document.getElementById('badge-match-amount').innerText = "✓ " + parsed.amount;
+      }
+
+      // ติ๊กเลือกมื้อยาอัตโนมัติตามที่ระบุ
+      const slots = Array.isArray(parsed.slots) ? parsed.slots : [];
+      ['morning', 'noon', 'evening', 'bedtime'].forEach(slot => {
+        const chk = document.getElementById('verify-slot-' + slot);
+        if (chk) {
+          chk.checked = slots.length > 0 ? slots.includes(slot) : false;
+        }
+      });
+      // ถ้าไม่ได้ระบุมื้อมาเลย ให้ default เป็นเช้า
+      if (slots.length === 0) {
+        const morningChk = document.getElementById('verify-slot-morning');
+        if (morningChk) morningChk.checked = true;
+      }
+
+      // ความสัมพันธ์กับอาหาร
+      const mealSelect = document.getElementById('verify-drug-meal');
+      if (mealSelect && parsed.timing) {
+        const t = String(parsed.timing).toLowerCase();
+        if (t.includes('immediate') || t.includes('ทันที') || t.includes('พร้อม')) {
+          mealSelect.value = "หลังอาหารทันที / พร้อมอาหารคำแรก";
+        } else if (t.includes('before') || t.includes('ก่อน')) {
+          mealSelect.value = "ก่อนอาหาร 30 นาที (ขณะท้องว่าง)";
+        } else if (t.includes('bed') || t.includes('นอน')) {
+          mealSelect.value = "ก่อนนอน";
+        } else if (t.includes('prn') || t.includes('อาการ') || t.includes('จำเป็น')) {
+          mealSelect.value = "เฉพาะเมื่อมีอาการ / ตามจำเป็น (PRN)";
+        } else {
+          mealSelect.value = "หลังอาหาร 15-30 นาที";
+        }
+      }
+
+      if (parsed.hospital) {
+        document.getElementById('verify-hospital-name').value = parsed.hospital;
+        syncHospitalDropdownWithName(parsed.hospital);
+        updateHospitalFavoriteButtonState();
+      }
+
+      if (parsed.warning) {
+        document.getElementById('verify-drug-caution').value = parsed.warning;
+      }
+
+      updatePrescriptionVerifyFormBadges();
     }
 
     function fallbackOcrDetection() {
@@ -1946,7 +2259,11 @@
       if (dosage) fieldDosage.value = dosage;
       if (amount) fieldAmount.value = amount;
       if (meal) fieldMeal.value = meal;
-      if (hospital) fieldHospital.value = hospital;
+      if (hospital) {
+        fieldHospital.value = hospital;
+        syncHospitalDropdownWithName(hospital);
+        updateHospitalFavoriteButtonState();
+      }
       if (caution) fieldCaution.value = caution;
       setVerifySlots(slots);
 
@@ -2001,18 +2318,302 @@
       return slots.length > 0 ? slots : ['morning'];
     }
 
-    function applySamplePreset(type) {
-      const rawTextEl = document.getElementById('raw-prescription-text');
-      if (type === 1) {
-        rawTextEl.value = "โรงพยาบาลศิริราช ยา: Amlodipine 5 mg รับประทานครั้งละ ครึ่งเม็ด วันละ 1 ครั้ง หลังอาหาร ตอนเช้า หลีกเลี่ยงน้ำส้มโอ";
-      } else if (type === 2) {
-        rawTextEl.value = "โรงพยาบาลจุฬาลงกรณ์ ยา: Metformin 500 mg รับประทานครั้งละ 1 เม็ด เช้าและเย็น หลังอาหารทันที ห้ามดื่มสุรา";
-      } else if (type === 3) {
-        rawTextEl.value = "โรงพยาบาลรามาธิบดี ยา: Atorvastatin 20 mg รับประทานครั้งละ 1 เม็ด วันละ 1 ครั้ง ก่อนนอน";
-      } else if (type === 4) {
-        rawTextEl.value = "คลินิกหมอสมชาย Amoxicillin 500 mg รับประทานครั้งละ 1 แคปซูล วันละ 3 ครั้ง เช้า กลางวัน เย็น หลังอาหาร ทานติดต่อกันจนหมด";
+    // =========================================================================
+    // ⭐ จัดการระบบโรงพยาบาลประจำ (Favorite Hospitals) และ Dropdown ในประเทศไทย
+    // =========================================================================
+    function getFavoriteHospitals() {
+      if (appSettings && Array.isArray(appSettings.favoriteHospitals) && appSettings.favoriteHospitals.length > 0) {
+        return appSettings.favoriteHospitals;
       }
-      parsePrescriptionTextToFields(rawTextEl.value);
+      return DEFAULT_SETTINGS.favoriteHospitals;
+    }
+
+    function initHospitalDropdown() {
+      const select = document.getElementById('select-hospital-dropdown');
+      if (!select) return;
+
+      const favs = getFavoriteHospitals();
+      const currentHospInput = document.getElementById('verify-hospital-name');
+      const currentVal = currentHospInput ? currentHospInput.value.trim() : (favs[0] || "โรงพยาบาลศิริราช");
+
+      let html = '';
+
+      // 1. หมวดโรงพยาบาลประจำ (Favorites)
+      if (favs.length > 0) {
+        html += '<optgroup label="⭐ โรงพยาบาลประจำของคุณ (Favorite)">';
+        favs.forEach(f => {
+          html += '<option value="' + f.replace(/"/g, '&quot;') + '">⭐ ' + f + '</option>';
+        });
+        html += '</optgroup>';
+      }
+
+      // 2. หมวดหมู่โรงพยาบาลในไทย
+      const categories = [
+        "โรงเรียนแพทย์ / มหาวิทยาลัย",
+        "โรงพยาบาลรัฐบาล / ส่วนกลาง",
+        "โรงพยาบาลศูนย์ / ประจำจังหวัด",
+        "โรงพยาบาลเอกชน"
+      ];
+
+      categories.forEach(cat => {
+        html += '<optgroup label="🏥 ' + cat + '">';
+        THAILAND_HOSPITALS.filter(h => h.category === cat).forEach(h => {
+          html += '<option value="' + h.name.replace(/"/g, '&quot;') + '">' + h.name + '</option>';
+        });
+        html += '</optgroup>';
+      });
+
+      // 3. ตัวเลือกกำหนดเอง
+      html += '<optgroup label="✏️ ระบุเอง">';
+      html += '<option value="__custom__">✏️ อื่นๆ / พิมพ์ระบุชื่อโรงพยาบาลเอง</option>';
+      html += '</optgroup>';
+
+      select.innerHTML = html;
+
+      // ปรับในหน้าตั้งค่าด้วย
+      const settingsAddSelect = document.getElementById('settings-add-hospital-select');
+      if (settingsAddSelect) {
+        let setHtml = '<option value="">-- เลือกโรงพยาบาลเพื่อติดดาว --</option>';
+        categories.forEach(cat => {
+          setHtml += '<optgroup label="🏥 ' + cat + '">';
+          THAILAND_HOSPITALS.filter(h => h.category === cat).forEach(h => {
+            const isAlreadyFav = favs.includes(h.name);
+            setHtml += '<option value="' + h.name.replace(/"/g, '&quot;') + '" ' + (isAlreadyFav ? 'disabled' : '') + '>' + h.name + (isAlreadyFav ? ' (ติดดาวแล้ว)' : '') + '</option>';
+          });
+          setHtml += '</optgroup>';
+        });
+        settingsAddSelect.innerHTML = setHtml;
+      }
+
+      syncHospitalDropdownWithName(currentVal);
+    }
+
+    function syncHospitalDropdownWithName(hospName) {
+      const select = document.getElementById('select-hospital-dropdown');
+      const input = document.getElementById('verify-hospital-name');
+      const customWrapper = document.getElementById('custom-hospital-wrapper');
+      if (!select || !input) return;
+
+      const cleanName = (hospName || "").trim();
+      input.value = cleanName;
+
+      // ตรวจสอบว่ามีชื่อนี้ใน select options หรือไม่
+      let matched = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === cleanName) {
+          select.selectedIndex = i;
+          matched = true;
+          break;
+        }
+      }
+
+      if (matched) {
+        if (customWrapper) customWrapper.classList.add('hidden');
+      } else if (cleanName) {
+        select.value = '__custom__';
+        if (customWrapper) customWrapper.classList.remove('hidden');
+      } else {
+        if (select.options.length > 0) select.selectedIndex = 0;
+        input.value = select.value !== '__custom__' ? select.value : '';
+        if (customWrapper) customWrapper.classList.add('hidden');
+      }
+
+      updateHospitalFavoriteButtonState();
+    }
+
+    function handleHospitalDropdownChange(val) {
+      const input = document.getElementById('verify-hospital-name');
+      const customWrapper = document.getElementById('custom-hospital-wrapper');
+      if (!input) return;
+
+      if (val === '__custom__') {
+        if (customWrapper) customWrapper.classList.remove('hidden');
+        input.focus();
+      } else {
+        if (customWrapper) customWrapper.classList.add('hidden');
+        input.value = val;
+      }
+      updateHospitalFavoriteButtonState();
+      renderFavoriteHospitalChips();
+    }
+
+    function onHospitalNameInput(val) {
+      updateHospitalFavoriteButtonState();
+      renderFavoriteHospitalChips();
+    }
+
+    function renderFavoriteHospitalChips() {
+      const container = document.getElementById('favorite-hospitals-chips');
+      const countBadge = document.getElementById('fav-hospital-count');
+      if (!container) return;
+
+      const favs = getFavoriteHospitals();
+      if (countBadge) countBadge.innerText = favs.length + " แห่ง";
+
+      if (favs.length === 0) {
+        container.innerHTML = `
+          <div class="text-stone-400 text-xs py-1 italic">
+            ยังไม่มีโรงพยาบาลประจำที่ติดดาวไว้ ⭐ คุณตาสามารถเลือกจากรายการด้านล่างแล้วกดปุ่ม "ติดดาวเป็น รพ.ประจำ" ได้เลยนะจ๊ะ
+          </div>
+        `;
+        return;
+      }
+
+      const currentHospInput = document.getElementById('verify-hospital-name');
+      const currentHosp = currentHospInput ? currentHospInput.value.trim() : "";
+
+      let chipsHtml = '';
+      favs.forEach(hosp => {
+        const isSelected = (currentHosp === hosp);
+        const activeClass = isSelected
+          ? 'bg-amber-500 text-white font-bold border-amber-600 shadow-sm scale-105'
+          : 'bg-white hover:bg-amber-50 text-stone-700 border-stone-200 hover:border-amber-300';
+
+        chipsHtml += `
+          <button type="button" onclick="selectFavoriteHospital('${hosp.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 transition-all active:scale-95 ${activeClass}">
+            <span class="${isSelected ? 'text-white' : 'text-amber-500'}">⭐</span>
+            <span>${hosp}</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = chipsHtml;
+    }
+
+    function renderSettingsFavoriteHospitals() {
+      const container = document.getElementById('settings-fav-hospitals-list');
+      const countBadge = document.getElementById('settings-fav-hosp-count');
+      if (!container) return;
+
+      const favs = getFavoriteHospitals();
+      if (countBadge) countBadge.innerText = favs.length + " แห่ง";
+
+      if (favs.length === 0) {
+        container.innerHTML = '<span class="text-xs text-stone-400 italic">ยังไม่มีโรงพยาบาลประจำ</span>';
+        return;
+      }
+
+      let html = '';
+      favs.forEach(hosp => {
+        html += `
+          <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs">
+            <span>⭐</span>
+            <span class="font-medium">${hosp}</span>
+            <button type="button" onclick="removeFavoriteHospital('${hosp.replace(/'/g, "\\'")}')" class="ml-1 text-stone-400 hover:text-rose-600 text-sm font-bold leading-none p-0.5" title="ลบออกจากโรงพยาบาลประจำ">×</button>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function selectFavoriteHospital(hospName) {
+      syncHospitalDropdownWithName(hospName);
+      renderFavoriteHospitalChips();
+      updateHospitalFavoriteButtonState();
+
+      // แสดง Toast แจ้งเตือนสั้นๆ
+      const badge = document.getElementById('review-safety-badge');
+      if (badge) {
+        const orig = badge.innerText;
+        badge.innerText = "⭐ เลือก: " + hospName;
+        badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900";
+        setTimeout(() => {
+          badge.innerText = orig;
+          badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800";
+        }, 2000);
+      }
+    }
+
+    function toggleCurrentHospitalFavorite() {
+      const input = document.getElementById('verify-hospital-name');
+      const hosp = input ? input.value.trim() : "";
+
+      if (!hosp) {
+        alert("กรุณาระบุหรือเลือกชื่อโรงพยาบาลก่อนกดติดดาวนะจ๊ะ");
+        return;
+      }
+
+      if (!Array.isArray(appSettings.favoriteHospitals)) {
+        appSettings.favoriteHospitals = [...DEFAULT_SETTINGS.favoriteHospitals];
+      }
+
+      const index = appSettings.favoriteHospitals.indexOf(hosp);
+      if (index >= 0) {
+        appSettings.favoriteHospitals.splice(index, 1);
+        alert("ถอนดาว '" + hosp + "' ออกจากโรงพยาบาลประจำเรียบร้อยแล้วจ้ะ");
+      } else {
+        appSettings.favoriteHospitals.push(hosp);
+        alert("⭐ บันทึก '" + hosp + "' เป็นโรงพยาบาลประจำเรียบร้อยแล้วจ้ะ!");
+      }
+
+      try {
+        localStorage.setItem("kind_pillbox_settings", JSON.stringify(appSettings));
+      } catch (e) {}
+
+      initHospitalDropdown();
+      renderFavoriteHospitalChips();
+      renderSettingsFavoriteHospitals();
+      updateHospitalFavoriteButtonState();
+    }
+
+    function addFavoriteHospitalFromSettings() {
+      const select = document.getElementById('settings-add-hospital-select');
+      const hosp = select ? select.value.trim() : "";
+      if (!hosp) {
+        alert("กรุณาเลือกโรงพยาบาลที่ต้องการติดดาวจากรายการก่อนนะจ๊ะ");
+        return;
+      }
+
+      if (!Array.isArray(appSettings.favoriteHospitals)) {
+        appSettings.favoriteHospitals = [...DEFAULT_SETTINGS.favoriteHospitals];
+      }
+
+      if (!appSettings.favoriteHospitals.includes(hosp)) {
+        appSettings.favoriteHospitals.push(hosp);
+        try {
+          localStorage.setItem("kind_pillbox_settings", JSON.stringify(appSettings));
+        } catch (e) {}
+
+        initHospitalDropdown();
+        renderFavoriteHospitalChips();
+        renderSettingsFavoriteHospitals();
+        alert("⭐ ติดดาว '" + hosp + "' เป็นโรงพยาบาลประจำสำเร็จแล้วจ้ะ");
+      }
+    }
+
+    function removeFavoriteHospital(hosp) {
+      if (!Array.isArray(appSettings.favoriteHospitals)) return;
+      appSettings.favoriteHospitals = appSettings.favoriteHospitals.filter(h => h !== hosp);
+      try {
+        localStorage.setItem("kind_pillbox_settings", JSON.stringify(appSettings));
+      } catch (e) {}
+
+      initHospitalDropdown();
+      renderFavoriteHospitalChips();
+      renderSettingsFavoriteHospitals();
+      updateHospitalFavoriteButtonState();
+    }
+
+    function updateHospitalFavoriteButtonState() {
+      const input = document.getElementById('verify-hospital-name');
+      const btn = document.getElementById('btn-toggle-favorite-hospital');
+      const starIcon = document.getElementById('fav-star-icon');
+      const starLabel = document.getElementById('fav-star-label');
+      if (!input || !btn) return;
+
+      const hosp = input.value.trim();
+      const favs = getFavoriteHospitals();
+      const isFav = hosp && favs.includes(hosp);
+
+      if (isFav) {
+        btn.className = "text-[11px] px-2.5 py-1 rounded-lg border font-medium transition flex items-center gap-1.5 bg-amber-100 border-amber-300 text-amber-900";
+        if (starIcon) starIcon.innerText = "⭐";
+        if (starLabel) starLabel.innerText = "รพ.ประจำแล้ว (แตะเพื่อถอน)";
+      } else {
+        btn.className = "text-[11px] px-2.5 py-1 rounded-lg border font-medium transition flex items-center gap-1.5 bg-stone-100 border-stone-200 text-stone-700 hover:bg-amber-50";
+        if (starIcon) starIcon.innerText = "☆";
+        if (starLabel) starLabel.innerText = "ติดดาวเป็น รพ.ประจำ";
+      }
     }
 
     function toggleConfirmButtonState() {
@@ -2782,6 +3383,11 @@
 
       if (viewName === 'pillbox') {
         renderCurrentSlot();
+      } else if (viewName === 'scanner') {
+        initHospitalDropdown();
+        renderFavoriteHospitalChips();
+      } else if (viewName === 'settings') {
+        renderSettingsFavoriteHospitals();
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
