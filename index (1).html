@@ -1434,7 +1434,7 @@
     // =========================================================================
     async function callGeminiApi(apiKey, contents, options = {}) {
       if (!apiKey || !apiKey.trim()) throw new Error("ไม่พบรหัส API Key");
-      const cleanKey = apiKey.trim();
+      const cleanKey = apiKey.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
       const models = ['gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-1.5-flash'];
       let lastError = null;
 
@@ -1523,13 +1523,17 @@
         const { data, model } = await callGeminiApi(apiKey, [
           { parts: [{ text: "สวัสดี ตอบสั้นๆ ไม่เกิน 10 คำ" }] }
         ], {
-          generationConfig: { maxOutputTokens: 30 }
+          generationConfig: { maxOutputTokens: 300 }
         });
 
         const duration = Math.round(performance.now() - startTime);
-        const reply = data.candidates && data.candidates[0] && data.candidates[0].content
-          ? data.candidates[0].content.parts[0].text.trim()
-          : "เชื่อมต่อสำเร็จ";
+        let reply = "ตลับยาใจดีพร้อมดูแลสุขภาพแล้วจ้ะ";
+        if (data && data.candidates && data.candidates[0] && data.candidates[0].content && Array.isArray(data.candidates[0].content.parts)) {
+          const textPart = data.candidates[0].content.parts.find(p => p.text);
+          if (textPart && textPart.text) {
+            reply = textPart.text.trim();
+          }
+        }
 
         resultBox.className = "p-3.5 rounded-2xl border text-xs space-y-1.5 leading-relaxed bg-emerald-50 border-emerald-300 text-emerald-950";
         resultBox.innerHTML = `
